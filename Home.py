@@ -1,10 +1,11 @@
+import requests
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import folium
 import numpy as np
-from streamlit import sidebar
-from streamlit.components.v1 import components
+from PIL import Image
+from io import BytesIO
 from streamlit_folium import st_folium, folium_static
 from folium import LayerControl
 from datetime import datetime, timedelta
@@ -175,7 +176,7 @@ st.markdown("""
 
 
 # Sidebar
-sidebar.markdown('<p class="title">Mission Control</p>', unsafe_allow_html=True)
+st.sidebar.markdown('<p class="title">Mission Control</p>', unsafe_allow_html=True)
 api_key = st.sidebar.text_input("Enter your NASA API key", placeholder="Demo_key", value="kK3QAv8cS9Lcy00gBb8qRiC2Is076W5P96H9cEax", type="password")
 api_choice = st.sidebar.selectbox("Choose an API", ["APOD", "Mars Rover Photos", "Asteroids NeoWs", "EPIC", "Earth Imagery", "EONET"])
 
@@ -253,32 +254,66 @@ if api_choice == "APOD":
 
 elif api_choice == "Mars Rover Photos":
     st.header("Mars Rover Photos")
-    rover = st.selectbox("Select a rover", ["Curiosity", "Opportunity", "Spirit"])
 
-    # Fetch the latest photos (sol 1000 for example, you may want to adjust this)
-    sol = st.number_input("Enter Sol (Martian day)", min_value=0, value=1000, step=1)
+    rover = "Curiosity"  # We're now focusing only on Curiosity
 
-    rover_data = fetch_mars_rover_photos(api_key, rover.lower(), sol)
+    search_type = st.radio("Search by", ["Martian Sol", "Earth Date"])
 
-    if "error" in rover_data:
-        st.error(rover_data["error"]["message"])
-    elif len(rover_data["photos"]) == 0:
-        st.warning(f"No photos available for {rover} on Sol {sol}. Try a different Sol.")
+    if search_type == "Martian Sol":
+        sol = st.number_input("Enter Sol (Martian day)", min_value=0, value=1000, step=1)
+        date_param = f"sol={sol}"
     else:
-        st.success(f"Found {len(rover_data['photos'])} photos")
-        cols = st.columns(3)
-        for i, photo in enumerate(rover_data["photos"][:9]):
-            with cols[i % 3]:
-                st.image(photo["img_src"], caption=f"Camera: {photo['camera']['full_name']}")
+        earth_date = st.date_input("Select Earth Date")
+        date_param = f"earth_date={earth_date}"
 
-        # Display some metadata
-        st.subheader("Rover Information")
-        if rover_data["photos"]:
-            rover_info = rover_data["photos"][0]["rover"]
-            st.write(f"Rover Name: {rover_info['name']}")
-            st.write(f"Landing Date: {rover_info['landing_date']}")
-            st.write(f"Launch Date: {rover_info['launch_date']}")
-            st.write(f"Status: {rover_info['status']}")
+    cameras = {
+        "FHAZ": "Front Hazard Avoidance Camera",
+        "RHAZ": "Rear Hazard Avoidance Camera",
+        "MAST": "Mast Camera",
+        "CHEMCAM": "Chemistry and Camera Complex",
+        "MAHLI": "Mars Hand Lens Imager",
+        "MARDI": "Mars Descent Imager",
+        "NAVCAM": "Navigation Camera"
+    }
+
+    camera = st.selectbox("Select Camera (optional)", ["All"] + list(cameras.keys()))
+    camera_param = f"&camera={camera.lower()}" if camera != "All" else ""
+
+    page = st.number_input("Page", min_value=1, value=1, step=1, key="page_number")
+
+
+    # Function to fetch and display photos
+    def fetch_and_display_photos():
+        with st.spinner("Fetching Mars Rover photos..."):
+            url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover.lower()}/photos?{date_param}{camera_param}&page={page}&api_key={api_key}"
+            response = requests.get(url)
+
+            if response.status_code == 200:
+                data = response.json()
+                photos = data.get("photos", [])
+
+                if len(photos) == 0:
+                    st.warning(f"No photos available for the selected criteria. Try different parameters.")
+                else:
+                    st.success(f"Found {len(photos)} photos")
+
+                    for photo in photos:
+                        st.subheader(f"Photo ID: {photo['id']}")
+                        st.image(photo['img_src'], caption=f"Taken by {photo['camera']['full_name']}")
+                        st.write(f"Earth Date: {photo['earth_date']}")
+                        st.write(f"Sol: {photo['sol']}")
+                        st.markdown(f"[Full Resolution Image]({photo['img_src']})")
+                        st.write("---")
+
+                    if len(photos) == 25:
+                        st.info(
+                            "This page shows the maximum of 25 photos. There may be more photos available on the next page.")
+            else:
+                st.error(f"Error fetching data: {response.status_code} - {response.text}")
+
+
+    # Fetch photos initially and when parameters change
+    fetch_and_display_photos()
 
 elif api_choice == "Asteroids NeoWs":
     st.header("Near Earth Objects")

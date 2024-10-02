@@ -25,14 +25,27 @@ def fetch_apod_data(api_key, date=None, start_date=None, end_date=None, count=No
     return response.json()
 
 
-def fetch_mars_rover_photos(api_key, rover, sol):
+def fetch_mars_rover_photos(api_key, rover, date_param, camera=None, page=1):
     url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover}/photos"
     params = {
-        "sol": sol,
-        "api_key": api_key
+        "api_key": api_key,
+        "page": page
     }
-    response = requests.get(url, params=params)
-    return response.json()
+
+    if "sol=" in date_param:
+        params["sol"] = date_param.split("=")[1]
+    elif "earth_date=" in date_param:
+        params["earth_date"] = date_param.split("=")[1]
+
+    if camera and camera != "All":
+        params["camera"] = camera.lower()
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()  # Raise an exception for bad status codes
+        return response.json()
+    except requests.RequestException as e:
+        return {"error": {"message": f"Failed to fetch data: {str(e)}"}}
 
 
 def fetch_asteroid_data(api_key, start_date, end_date):
