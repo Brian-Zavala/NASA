@@ -251,7 +251,7 @@ if api_choice == "APOD":
 elif api_choice == "Mars Rover Photos":
     st.header("Mars Rover Photos")
 
-    rover = "Curiosity"  # We're now focusing only on Curiosity
+    rover = "Curiosity"  # We're focusing only on Curiosity
 
     search_type = st.radio("Search by", ["Martian Sol", "Earth Date"])
 
@@ -277,11 +277,8 @@ elif api_choice == "Mars Rover Photos":
 
     page = st.number_input("Page", min_value=1, value=1, step=1, key="page_number")
 
-
-
-
-    # Fetch photos initially and when parameters change
-    fetch_and_display_photos()
+    # Fetch photos when any parameter changes
+    fetch_and_display_photos(api_key, rover, date_param, camera_param, page)
 
 elif api_choice == "Asteroids NeoWs":
     st.header("Near Earth Objects")

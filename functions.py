@@ -133,9 +133,10 @@ def fetch_earth_imagery(api_key, lat, lon, date, dim=0.15):
         return {"error": f"Failed to process image: {str(e)}"}, None
 
  # Function to fetch and display photos
-def fetch_and_display_photos():
+def fetch_and_display_photos(api_key, rover, date_param, camera_param, page):
+    url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover.lower()}/photos?{date_param}{camera_param}&page={page}&api_key={api_key}"
+
     with st.spinner("Fetching Mars Rover photos..."):
-        url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover.lower()}/photos?{date_param}{camera_param}&page={page}&api_key={api_key}"
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -147,21 +148,33 @@ def fetch_and_display_photos():
             else:
                 st.success(f"Found {len(photos)} photos")
 
-                for photo in photos:
-                    st.subheader(f"Photo ID: {photo['id']}")
-                    st.image(photo['img_src'], caption=f"Taken by {photo['camera']['full_name']}")
-                    st.write(f"Earth Date: {photo['earth_date']}")
-                    st.write(f"Sol: {photo['sol']}")
-                    st.markdown(f"[Full Resolution Image]({photo['img_src']})")
-                    st.write("---")
+                # Display some metadata
+                if photos:
+                    st.subheader("Rover Information")
+                    rover_info = photos[0]["rover"]
+                    st.write(f"Rover Name: {rover_info['name']}")
+                    st.write(f"Landing Date: {rover_info['landing_date']}")
+                    st.write(f"Launch Date: {rover_info['launch_date']}")
+                    st.write(f"Status: {rover_info['status']}")
 
-                if len(photos) == 25:
-                    st.info(
-                        "This page shows the maximum of 25 photos. There may be more photos available on the next page.")
+                # Display photos
+                st.subheader("Photos")
+                cols = st.columns(3)
+                for i, photo in enumerate(photos):
+                    with cols[i % 3]:
+                        st.image(photo["img_src"], caption=f"Photo {i + 1} - Camera: {photo['camera']['full_name']}")
+
+                # Create a dataframe of all photos for download
+                photos_df = pd.DataFrame(photos)
+                csv = photos_df.to_csv(index=False)
+                st.download_button(
+                    label="Download photo data as CSV",
+                    data=csv,
+                    file_name=f"{rover}_photos.csv",
+                    mime="text/csv",
+                )
         else:
             st.error(f"Error fetching data: {response.status_code} - {response.text}")
-
-
 
 def fetch_earth_assets(api_key, lat, lon, date):
     url = f"https://api.nasa.gov/planetary/earth/assets"
