@@ -37,7 +37,7 @@ st.markdown("""
     }
 
     .stApp {
-        background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1351&q=80');
+        background-image: url('https://wallpaperaccess.com/full/3861869.jpg');
         background-size: cover;
         background-attachment: fixed;
     }
