@@ -132,6 +132,36 @@ def fetch_earth_imagery(api_key, lat, lon, date, dim=0.15):
     except IOError as e:
         return {"error": f"Failed to process image: {str(e)}"}, None
 
+ # Function to fetch and display photos
+def fetch_and_display_photos():
+    with st.spinner("Fetching Mars Rover photos..."):
+        url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover.lower()}/photos?{date_param}{camera_param}&page={page}&api_key={api_key}"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            data = response.json()
+            photos = data.get("photos", [])
+
+            if len(photos) == 0:
+                st.warning(f"No photos available for the selected criteria. Try different parameters.")
+            else:
+                st.success(f"Found {len(photos)} photos")
+
+                for photo in photos:
+                    st.subheader(f"Photo ID: {photo['id']}")
+                    st.image(photo['img_src'], caption=f"Taken by {photo['camera']['full_name']}")
+                    st.write(f"Earth Date: {photo['earth_date']}")
+                    st.write(f"Sol: {photo['sol']}")
+                    st.markdown(f"[Full Resolution Image]({photo['img_src']})")
+                    st.write("---")
+
+                if len(photos) == 25:
+                    st.info(
+                        "This page shows the maximum of 25 photos. There may be more photos available on the next page.")
+        else:
+            st.error(f"Error fetching data: {response.status_code} - {response.text}")
+
+
 
 def fetch_earth_assets(api_key, lat, lon, date):
     url = f"https://api.nasa.gov/planetary/earth/assets"

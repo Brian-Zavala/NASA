@@ -1,20 +1,14 @@
 import base64
 import io
-import requests
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import folium
-import numpy as np
 from PIL import Image
-from io import BytesIO
 from streamlit_folium import st_folium, folium_static
-from folium import LayerControl
 from datetime import datetime, timedelta
-from folium.plugins import Draw, MeasureControl
-from matplotlib import pyplot as plt
 from functions import (fetch_apod_data, fetch_earth_imagery, fetch_eonet_events,
-fetch_asteroid_data, fetch_earth_assets, fetch_mars_rover_photos, fetch_epic_data, process_eonet_data)
+fetch_asteroid_data, fetch_earth_assets, fetch_and_display_photos, fetch_epic_data, process_eonet_data)
 
 # Set page config
 st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide")
@@ -284,34 +278,6 @@ elif api_choice == "Mars Rover Photos":
     page = st.number_input("Page", min_value=1, value=1, step=1, key="page_number")
 
 
-    # Function to fetch and display photos
-    def fetch_and_display_photos():
-        with st.spinner("Fetching Mars Rover photos..."):
-            url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover.lower()}/photos?{date_param}{camera_param}&page={page}&api_key={api_key}"
-            response = requests.get(url)
-
-            if response.status_code == 200:
-                data = response.json()
-                photos = data.get("photos", [])
-
-                if len(photos) == 0:
-                    st.warning(f"No photos available for the selected criteria. Try different parameters.")
-                else:
-                    st.success(f"Found {len(photos)} photos")
-
-                    for photo in photos:
-                        st.subheader(f"Photo ID: {photo['id']}")
-                        st.image(photo['img_src'], caption=f"Taken by {photo['camera']['full_name']}")
-                        st.write(f"Earth Date: {photo['earth_date']}")
-                        st.write(f"Sol: {photo['sol']}")
-                        st.markdown(f"[Full Resolution Image]({photo['img_src']})")
-                        st.write("---")
-
-                    if len(photos) == 25:
-                        st.info(
-                            "This page shows the maximum of 25 photos. There may be more photos available on the next page.")
-            else:
-                st.error(f"Error fetching data: {response.status_code} - {response.text}")
 
 
     # Fetch photos initially and when parameters change
@@ -319,31 +285,106 @@ elif api_choice == "Mars Rover Photos":
 
 elif api_choice == "Asteroids NeoWs":
     st.header("Near Earth Objects")
-    start_date = st.date_input("Start date", datetime.now())
-    end_date = st.date_input("End date", datetime.now() + timedelta(days=7))
+
+    col1, col2 = st.columns(2)
+    with col1:
+        start_date = st.date_input("Start date", datetime.now())
+    with col2:
+        end_date = st.date_input("End date", datetime.now() + timedelta(days=7))
 
     if start_date <= end_date:
-        asteroid_data = fetch_asteroid_data(api_key, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
+        with st.spinner("Fetching asteroid data..."):
+            asteroid_data = fetch_asteroid_data(api_key, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
 
         if "error" in asteroid_data:
             st.error(asteroid_data["error"]["message"])
         else:
             asteroid_counts = []
+            all_asteroids = []
             for date, asteroids in asteroid_data["near_earth_objects"].items():
                 asteroid_counts.append({"date": date, "count": len(asteroids)})
+                all_asteroids.extend(asteroids)
 
             df = pd.DataFrame(asteroid_counts)
+
+            # Bar chart of asteroid counts
             fig = px.bar(df, x="date", y="count", title="Number of Near Earth Objects by Date")
             st.plotly_chart(fig)
 
             total_asteroids = sum(df["count"])
-            st.metric("Total Near Earth Objects", total_asteroids)
+            hazardous_asteroids = sum(1 for asteroid in all_asteroids if asteroid["is_potentially_hazardous_asteroid"])
 
-            hazardous_asteroids = sum(1 for date in asteroid_data["near_earth_objects"].values() for asteroid in date if
-                                      asteroid["is_potentially_hazardous_asteroid"])
-            st.metric("Potentially Hazardous Asteroids", hazardous_asteroids)
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Total Near Earth Objects", total_asteroids)
+            with col2:
+                st.metric("Potentially Hazardous Asteroids", hazardous_asteroids)
+
+            # Asteroid size distribution with names
+            st.subheader("Asteroid Size Distribution")
+            size_data = [{"name": asteroid["name"],
+                          "size": asteroid["estimated_diameter"]["meters"]["estimated_diameter_max"],
+                          "hazardous": asteroid["is_potentially_hazardous_asteroid"]}
+                         for asteroid in all_asteroids]
+            size_df = pd.DataFrame(size_data)
+            fig_size = px.scatter(size_df, x="size", y="name", color="hazardous",
+                                  labels={'size': 'Estimated Max Diameter (meters)', 'name': 'Asteroid Name',
+                                          'hazardous': 'Potentially Hazardous'},
+                                  title="Asteroid Sizes",
+                                  hover_data=["size"])
+            fig_size.update_layout(height=600)
+            st.plotly_chart(fig_size)
+
+            # Closest approaches
+            st.subheader("Closest Approaches")
+            closest_approaches = sorted(all_asteroids, key=lambda x: float(
+                x["close_approach_data"][0]["miss_distance"]["kilometers"]))[:5]
+            for asteroid in closest_approaches:
+                st.write(f"Asteroid: {asteroid['name']}")
+                st.write(f"Close approach date: {asteroid['close_approach_data'][0]['close_approach_date']}")
+                st.write(
+                    f"Miss distance: {float(asteroid['close_approach_data'][0]['miss_distance']['kilometers']):.2f} km")
+                st.write("---")
+
+            # Size comparison visualization
+            st.subheader("Asteroid Size Comparison")
+            selected_asteroids = st.multiselect("Select asteroids to compare",
+                                                options=[asteroid['name'] for asteroid in all_asteroids],
+                                                default=[asteroid['name'] for asteroid in all_asteroids[:5]])
+
+            if selected_asteroids:
+                comparison_data = [
+                    {
+                        "name": asteroid['name'],
+                        "size": asteroid["estimated_diameter"]["meters"]["estimated_diameter_max"],
+                        "hazardous": asteroid["is_potentially_hazardous_asteroid"]
+                    }
+                    for asteroid in all_asteroids if asteroid['name'] in selected_asteroids
+                ]
+                comparison_df = pd.DataFrame(comparison_data)
+                fig_comparison = px.bar(comparison_df, x="name", y="size", color="hazardous",
+                                        labels={'size': 'Estimated Max Diameter (meters)', 'name': 'Asteroid Name',
+                                                'hazardous': 'Potentially Hazardous'},
+                                        title="Asteroid Size Comparison")
+                fig_comparison.update_layout(xaxis={'categoryorder': 'total descending'})
+                st.plotly_chart(fig_comparison)
+
+            # Individual asteroid explorer
+            st.subheader("Explore Individual Asteroids")
+            selected_asteroid = st.selectbox("Select an asteroid", [asteroid['name'] for asteroid in all_asteroids])
+            asteroid_info = next(asteroid for asteroid in all_asteroids if asteroid['name'] == selected_asteroid)
+
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                # Display a generic asteroid image
+                st.image("https://www.nasa.gov/sites/default/files/thumbnails/image/asteroid20180605-16.jpg",
+                         caption="Generic Asteroid Image (NASA)")
+            with col2:
+                st.json(asteroid_info)
+
     else:
         st.error("End date must be after start date")
+
 
 elif api_choice == "EPIC":
     st.header("Earth Polychromatic Imaging Camera (EPIC)")
