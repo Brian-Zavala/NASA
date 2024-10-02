@@ -1,3 +1,5 @@
+import base64
+import io
 import requests
 import streamlit as st
 import pandas as pd
@@ -374,6 +376,16 @@ elif api_choice == "EPIC":
 elif api_choice == "Earth Imagery":
     st.header("Earth Imagery")
 
+    # Initialize session state variables
+    if 'earth_image' not in st.session_state:
+        st.session_state.earth_image = None
+    if 'earth_image_date' not in st.session_state:
+        st.session_state.earth_image_date = None
+    if 'earth_image_assets' not in st.session_state:
+        st.session_state.earth_image_assets = None
+    if 'earth_image_params' not in st.session_state:
+        st.session_state.earth_image_params = None
+
     col1, col2 = st.columns(2)
     with col1:
         lat = st.number_input("Latitude", value=29.78, step=0.01)
@@ -382,82 +394,88 @@ elif api_choice == "Earth Imagery":
 
     date = st.date_input("Select a date (YYYY-MM-DD)", datetime.now() - timedelta(days=30))
 
-    # Create a base map
-    m = folium.Map(location=[lat, lon], zoom_start=10)
+    # Add a slider for image resolution
+    dim = st.slider("Image Resolution (degrees)", min_value=0.01, max_value=0.3, value=0.15, step=0.01,
+                    help="Higher values result in a larger area but lower resolution. Lower values give higher resolution but cover a smaller area.")
 
-    # Add drawing support
-    draw = Draw(
-        draw_options={
-            'polyline': False,
-            'rectangle': True,
-            'polygon': True,
-            'circle': True,
-            'marker': True,
-            'circlemarker': False
-        },
-        edit_options={'edit': True}
-    )
-    draw.add_to(m)
-
-    # Add measure control
-    MeasureControl(position='topright', primary_length_unit='kilometers').add_to(m)
-
-    # Add layer control
-    LayerControl().add_to(m)
-
-    # Display the map
-    st_data = st_folium(m, width=725, height=500)
+    # Create a map to show the selected location
+    location_map = folium.Map(location=[lat, lon], zoom_start=4)
+    folium.Marker([lat, lon], popup="Selected Location").add_to(location_map)
+    st_folium(location_map, width=425, height=325)
 
     if st.button("Fetch Earth Imagery"):
         with st.spinner("Fetching Earth imagery..."):
-            image = fetch_earth_imagery(api_key, lat, lon, date.strftime("%Y-%m-%d"))
+            image_result, params = fetch_earth_imagery(api_key, lat, lon, date.strftime("%Y-%m-%d"), dim)
             assets = fetch_earth_assets(api_key, lat, lon, date.strftime("%Y-%m-%d"))
 
-        if image:
-            st.image(image, caption="Landsat 8 Imagery", use_column_width=True)
-
-            # Display image metadata
-            st.subheader("Image Metadata")
-            st.json(assets)
-
-            # Add image overlay to the map
-            img_bounds = [[lat - 0.1, lon - 0.1], [lat + 0.1, lon + 0.1]]  # Approximate bounds
-            folium.raster_layers.ImageOverlay(
-                image=image,
-                bounds=img_bounds,
-                opacity=0.6,
-                name="Landsat 8 Image"
-            ).add_to(m)
-
-            # Re-render the map with the new layer
-            st_data = st_folium(m, width=725, height=500)
-
-            # Add image analysis features
-            st.subheader("Image Analysis")
-
-            # Convert image to numpy array for analysis
-            img_array = np.array(image)
-
-            # Display basic image statistics
-            st.write(f"Image shape: {img_array.shape}")
-            st.write(f"Mean pixel value: {np.mean(img_array):.2f}")
-            st.write(f"Standard deviation: {np.std(img_array):.2f}")
-
-            # Add a histogram of pixel values
-            fig, ax = plt.subplots()
-            ax.hist(img_array.ravel(), bins=256, range=(0, 255))
-            ax.set_title("Histogram of Pixel Values")
-            ax.set_xlabel("Pixel Value")
-            ax.set_ylabel("Frequency")
-            st.pyplot(fig)
-
+        if isinstance(image_result, dict) and "error" in image_result:
+            st.error(image_result["error"])
+        elif isinstance(image_result, Image.Image):
+            # Store the image, date, assets, and params in session state
+            st.session_state.earth_image = image_result
+            st.session_state.earth_image_date = date
+            st.session_state.earth_image_assets = assets
+            st.session_state.earth_image_params = params
+            st.success("Image fetched successfully!")
         else:
-            st.error("Failed to fetch Earth imagery. Please try a different location or date.")
+            st.error("Unexpected result when fetching the image. Please try again.")
 
-    # Display information about map interactions
-    st.subheader("Map Interaction Data")
-    st.write(st_data)
+    # Display the image if it exists in session state
+    if st.session_state.earth_image is not None:
+        st.image(st.session_state.earth_image, caption=f"Landsat 8 Imagery (Date: {st.session_state.earth_image_date})",
+                 use_column_width=True)
 
+        # Display image information
+        st.subheader("Image Information")
+        image_width, image_height = st.session_state.earth_image.size
+        st.write(f"Image dimensions: {image_width}x{image_height} pixels")
+        st.write(f"Resolution: {st.session_state.earth_image_params['dim']} degrees")
+
+        approx_km = st.session_state.earth_image_params['dim'] * 111  # Approximate km per degree
+        st.write(f"Approximate area covered: {approx_km:.2f}km x {approx_km:.2f}km")
+
+        # Display image metadata
+        if st.session_state.earth_image_assets is not None:
+            st.subheader("Image Metadata")
+            st.json(st.session_state.earth_image_assets)
+
+        # Convert PIL Image to bytes for download
+        img_byte_arr = io.BytesIO()
+        st.session_state.earth_image.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+
+        # Provide a download button for the image
+        st.download_button(
+            label="Download Image",
+            data=img_byte_arr,
+            file_name="earth_imagery.png",
+            mime="image/png"
+        )
+
+        # Create a base map for the image overlay
+        m = folium.Map(location=[lat, lon], zoom_start=10)
+
+        # Convert PIL Image to base64 for Folium
+        buffered = io.BytesIO()
+        st.session_state.earth_image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+
+        # Add image overlay to the map
+        img_bounds = [
+            [lat - st.session_state.earth_image_params['dim'] / 2,
+             lon - st.session_state.earth_image_params['dim'] / 2],
+            [lat + st.session_state.earth_image_params['dim'] / 2, lon + st.session_state.earth_image_params['dim'] / 2]
+        ]
+        folium.raster_layers.ImageOverlay(
+            image=f"data:image/png;base64,{img_str}",
+            bounds=img_bounds,
+            opacity=0.6,
+            name="Landsat 8 Image"
+        ).add_to(m)
+
+        # Display the map with the image overlay
+        st.subheader("Image Overlay on Map")
+        st_folium(m, width=725, height=500)
 elif api_choice == "EONET":
     st.header("Earth Observatory Natural Event Tracker (EONET)")
 

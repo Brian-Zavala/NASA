@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-import PIL as Image
+from PIL import Image
 import pandas as pd
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -113,7 +113,7 @@ def fetch_earth_data_search(query, limit=10):
     return response.json()
 
 
-def fetch_earth_imagery(api_key, lat, lon, date, dim=0.025):
+def fetch_earth_imagery(api_key, lat, lon, date, dim=0.15):
     url = f"https://api.nasa.gov/planetary/earth/imagery"
     params = {
         "lon": lon,
@@ -122,11 +122,15 @@ def fetch_earth_imagery(api_key, lat, lon, date, dim=0.025):
         "dim": dim,
         "api_key": api_key
     }
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        return Image.open(BytesIO(response.content))
-    else:
-        return None
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()  # Raise an exception for bad status codes
+        image = Image.open(BytesIO(response.content))
+        return image, params
+    except requests.RequestException as e:
+        return {"error": f"Failed to fetch image: {str(e)}"}, None
+    except IOError as e:
+        return {"error": f"Failed to process image: {str(e)}"}, None
 
 
 def fetch_earth_assets(api_key, lat, lon, date):
