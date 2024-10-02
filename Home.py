@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
 import folium
@@ -14,6 +13,15 @@ fetch_asteroid_data, fetch_earth_assets, fetch_mars_rover_photos, fetch_epic_dat
 
 # Set page config
 st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide")
+
+# Hide Streamlit toolbar
+st.markdown("""
+<style>
+#MainMenu {visibility: hidden;}
+header {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
 
 # Custom CSS
 st.markdown("""
