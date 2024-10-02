@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 
 
-# Helper functions
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def fetch_apod_data(api_key, date=None, start_date=None, end_date=None, count=None, thumbs=False):
     url = f"https://api.nasa.gov/planetary/apod?api_key={api_key}"
     params = {}
@@ -25,6 +25,7 @@ def fetch_apod_data(api_key, date=None, start_date=None, end_date=None, count=No
     return response.json()
 
 
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def fetch_mars_rover_photos(api_key, rover, date_param, camera=None, page=1):
     url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover}/photos"
     params = {
@@ -48,6 +49,7 @@ def fetch_mars_rover_photos(api_key, rover, date_param, camera=None, page=1):
         return {"error": {"message": f"Failed to fetch data: {str(e)}"}}
 
 
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def fetch_asteroid_data(api_key, start_date, end_date):
     url = f"https://api.nasa.gov/neo/rest/v1/feed"
     params = {
@@ -113,6 +115,7 @@ def fetch_earth_data_search(query, limit=10):
     return response.json()
 
 
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def fetch_earth_imagery(api_key, lat, lon, date, dim=0.15):
     url = f"https://api.nasa.gov/planetary/earth/imagery"
     params = {
@@ -132,7 +135,8 @@ def fetch_earth_imagery(api_key, lat, lon, date, dim=0.15):
     except IOError as e:
         return {"error": f"Failed to process image: {str(e)}"}, None
 
- # Function to fetch and display photos
+
+# Function to fetch and display photos
 def fetch_and_display_photos(api_key, rover, date_param, camera_param, page):
     url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover.lower()}/photos?{date_param}{camera_param}&page={page}&api_key={api_key}"
 
@@ -176,6 +180,21 @@ def fetch_and_display_photos(api_key, rover, date_param, camera_param, page):
         else:
             st.error(f"Error fetching data: {response.status_code} - {response.text}")
 
+
+@st.cache_data
+def get_camera_options():
+    return {
+        "FHAZ": "Front Hazard Avoidance Camera",
+        "RHAZ": "Rear Hazard Avoidance Camera",
+        "MAST": "Mast Camera",
+        "CHEMCAM": "Chemistry and Camera Complex",
+        "MAHLI": "Mars Hand Lens Imager",
+        "MARDI": "Mars Descent Imager",
+        "NAVCAM": "Navigation Camera"
+    }
+
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def fetch_earth_assets(api_key, lat, lon, date):
     url = f"https://api.nasa.gov/planetary/earth/assets"
     params = {

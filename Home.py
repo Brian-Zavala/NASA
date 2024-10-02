@@ -8,7 +8,8 @@ from PIL import Image
 from streamlit_folium import st_folium, folium_static
 from datetime import datetime, timedelta
 from functions import (fetch_apod_data, fetch_earth_imagery, fetch_eonet_events,
-fetch_asteroid_data, fetch_earth_assets, fetch_and_display_photos, fetch_epic_data, process_eonet_data)
+                       fetch_asteroid_data, fetch_earth_assets, fetch_and_display_photos, get_camera_options,
+                       fetch_epic_data, process_eonet_data)
 
 # Set page config
 st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide")
@@ -170,11 +171,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 # Sidebar
 st.sidebar.markdown('<p class="title">Mission Control</p>', unsafe_allow_html=True)
-api_key = st.sidebar.text_input("Enter your NASA API key", placeholder="Demo_key", value="kK3QAv8cS9Lcy00gBb8qRiC2Is076W5P96H9cEax", type="password")
-api_choice = st.sidebar.selectbox("Choose an API", ["APOD", "Mars Rover Photos", "Asteroids NeoWs", "EPIC", "Earth Imagery", "EONET"])
+api_key = st.sidebar.text_input("Enter your NASA API key", placeholder="Demo_key",
+                                value="kK3QAv8cS9Lcy00gBb8qRiC2Is076W5P96H9cEax", type="password")
+api_choice = st.sidebar.selectbox("Choose an API",
+                                  ["APOD", "Mars Rover Photos", "Asteroids NeoWs", "EPIC", "Earth Imagery", "EONET"])
 
 # Alien animation in sidebar
 alien_animation = """
@@ -262,15 +264,7 @@ elif api_choice == "Mars Rover Photos":
         earth_date = st.date_input("Select Earth Date")
         date_param = f"earth_date={earth_date}"
 
-    cameras = {
-        "FHAZ": "Front Hazard Avoidance Camera",
-        "RHAZ": "Rear Hazard Avoidance Camera",
-        "MAST": "Mast Camera",
-        "CHEMCAM": "Chemistry and Camera Complex",
-        "MAHLI": "Mars Hand Lens Imager",
-        "MARDI": "Mars Descent Imager",
-        "NAVCAM": "Navigation Camera"
-    }
+    cameras = get_camera_options()
 
     camera = st.selectbox("Select Camera (optional)", ["All"] + list(cameras.keys()))
     camera_param = f"&camera={camera.lower()}" if camera != "All" else ""
@@ -439,7 +433,7 @@ elif api_choice == "Earth Imagery":
     # Create a map to show the selected location
     location_map = folium.Map(location=[lat, lon], zoom_start=4)
     folium.Marker([lat, lon], popup="Selected Location").add_to(location_map)
-    st_folium(location_map, width=325, height=175)
+    st_folium(location_map, width=285, height=145)
 
     if st.button("Fetch Earth Imagery"):
         with st.spinner("Fetching Earth imagery..."):
@@ -546,7 +540,8 @@ elif api_choice == "EONET":
 
                 # Filtering options
                 st.subheader("Filter Events")
-                selected_categories = st.multiselect("Select categories", options=sorted(events_df["category"].unique()))
+                selected_categories = st.multiselect("Select categories",
+                                                     options=sorted(events_df["category"].unique()))
                 min_date = events_df["date"].min().date()
                 max_date = events_df["date"].max().date()
                 date_range = st.date_input("Select date range", [min_date, max_date])
@@ -586,7 +581,7 @@ elif api_choice == "EONET":
         else:
             st.error("Failed to fetch EONET data or no events found.")
 
-
 st.sidebar.markdown("---")
-st.sidebar.info("This app uses NASA's public APIs to explore various space and Earth science data. Enter your API key for full access, or use key provided for limited access.")
+st.sidebar.info(
+    "This app uses NASA's public APIs to explore various space and Earth science data. Enter your API key for full access, or use key provided for limited access.")
 st.sidebar.warning("Note: Using key provided may result in rate limiting.")
