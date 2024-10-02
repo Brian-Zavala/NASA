@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
 import folium
@@ -17,23 +18,82 @@ st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wi
 # Custom CSS
 st.markdown("""
 <style>
-    .reportview-container {
-        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-        color: #ffffff;
+    body {
+        font-family: 'Open Sans', sans-serif;
+        color: #333333;
     }
-    .sidebar .sidebar-content {
-        background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
-        color: #ffffff;
+
+    .title {
+        color: #1a1a1a;
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 20px;
     }
-    .Widget>label {
-        color: #ffffff;
+
+    .sidebar {
+        background-color: #f2f2f2;
+        padding: 20px;
+        border-radius: 10px;
     }
-    .stSelectbox>div>div>div {
-        background-color: #0f2027;
+
+    .sidebar-title {
+        color: #1a1a1a;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .api-section {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .api-title {
+        color: #1a1a1a;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .button {
+        background-color: #ff5722;
         color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .button:hover {
+        background-color: #f44336;
+    }
+
+    @media (max-width: 767px) {
+        .title {
+            font-size: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+        }
+
+        .api-title {
+            font-size: 22px;
+        }
+
+        .button {
+            font-size: 14px;
+            padding: 8px 16px;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
+
 
 # Sidebar
 st.sidebar.title("NASA Data Explorer")
