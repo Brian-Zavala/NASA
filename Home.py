@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import folium
 import numpy as np
+from streamlit.components.v1 import components
 from streamlit_folium import st_folium, folium_static
 from folium import LayerControl
 from datetime import datetime, timedelta
@@ -22,6 +23,8 @@ header {visibility: hidden;}
 footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
+
+
 
 # Custom CSS
 st.markdown("""
@@ -105,7 +108,7 @@ st.markdown("""
 
 # Sidebar
 st.sidebar.title("NASA Data Explorer")
-api_key = st.sidebar.text_input("Enter your NASA API key", value="DEMO_KEY", type="password")
+api_key = st.sidebar.text_input("Enter your NASA API key", placeholder="Demo_key", value="kK3QAv8cS9Lcy00gBb8qRiC2Is076W5P96H9cEax", type="password")
 api_choice = st.sidebar.selectbox("Choose an API", ["APOD", "Mars Rover Photos", "Asteroids NeoWs", "EPIC", "Earth Imagery", "EONET"])
 
 
@@ -409,5 +412,5 @@ elif api_choice == "EONET":
 
 
 st.sidebar.markdown("---")
-st.sidebar.info("This app uses NASA's public APIs to explore various space and Earth science data. Enter your API key for full access, or use 'DEMO_KEY' for limited access.")
-st.sidebar.warning("Note: Using 'DEMO_KEY' may result in rate limiting.")
+st.sidebar.info("This app uses NASA's public APIs to explore various space and Earth science data. Enter your API key for full access, or use key provided for limited access.")
+st.sidebar.warning("Note: Using key provided may result in rate limiting.")
