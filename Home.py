@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import folium
 import numpy as np
+from streamlit import sidebar
 from streamlit.components.v1 import components
 from streamlit_folium import st_folium, folium_static
 from folium import LayerControl
@@ -24,7 +25,74 @@ footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
+# Custom CSS with space theme and glowing text
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
+    body {
+        background-color: #0c0c1d;
+        color: #e0e0ff;
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    .stApp {
+        background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1351&q=80');
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
+    .title {
+        font-size: 48px;
+        font-weight: bold;
+        text-align: center;
+        color: #00ffff;
+        text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+        animation: glow 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+        from {
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+        }
+        to {
+            text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff;
+        }
+    }
+
+    .sidebar .sidebar-content {
+        background-color: rgba(12, 12, 29, 0.8);
+    }
+
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        border-radius: 20px;
+        border: 2px solid #45a049;
+        transition: all 0.3s;
+    }
+
+    .stButton>button:hover {
+        background-color: #45a049;
+        box-shadow: 0 0 10px #4CAF50;
+    }
+
+    .stTextInput>div>div>input {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #e0e0ff;
+        border: 1px solid #00ffff;
+        border-radius: 10px;
+    }
+
+    .stSelectbox>div>div>select {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #e0e0ff;
+        border: 1px solid #00ffff;
+        border-radius: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # Custom CSS
 st.markdown("""
@@ -107,14 +175,31 @@ st.markdown("""
 
 
 # Sidebar
-st.sidebar.title("NASA Data Explorer")
+sidebar.markdown('<p class="title">Mission Control</p>', unsafe_allow_html=True)
 api_key = st.sidebar.text_input("Enter your NASA API key", placeholder="Demo_key", value="kK3QAv8cS9Lcy00gBb8qRiC2Is076W5P96H9cEax", type="password")
 api_choice = st.sidebar.selectbox("Choose an API", ["APOD", "Mars Rover Photos", "Asteroids NeoWs", "EPIC", "Earth Imagery", "EONET"])
 
-
+# Alien animation in sidebar
+alien_animation = """
+<style>
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+.alien {
+    font-size: 80px;
+    animation: float 3s ease-in-out infinite;
+    text-align: center;
+    margin-bottom: -64px;
+}
+</style>
+<div class="alien">👽</div>
+"""
+st.sidebar.markdown(alien_animation, unsafe_allow_html=True)
 
 # Main app
-st.title("🌌 NASA Data Explorer")
+st.markdown('<p class="title">🌌 Space Explorer 🛸</p>', unsafe_allow_html=True)
 
 if api_choice == "APOD":
     st.header("Astronomy Picture of the Day")
