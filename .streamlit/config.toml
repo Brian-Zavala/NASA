@@ -1,0 +1,6 @@
+[server]
+showAppInBrowser = false
+
+[client]
+showErrorDetails = false
+toolbarMode = 'minimal'
