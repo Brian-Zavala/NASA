@@ -338,8 +338,12 @@ if api_choice == "APOD":
     # Display APOD data
     if isinstance(apod_data, list):
         for item in apod_data:
-            if "error" in item:
-                st.error(item["error"]["message"])
+            if "error" not in item:
+                st.subheader(item["title"])
+                if item["media_type"] == "image":
+                    st.markdown('<div class="responsive-img-container">', unsafe_allow_html=True)
+                    st.image(item["url"], caption=item["title"], use_column_width=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
             else:
                 st.subheader(item["title"])
                 if item["media_type"] == "image":
