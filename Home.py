@@ -16,70 +16,168 @@ st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wi
 
 
 
-# Hide Streamlit toolbar
-st.markdown("""
-<style>
-#MainMenu {visibility: hidden;}
-header {visibility: hidden;}
-footer {visibility: hidden;}
-</style>
-""", unsafe_allow_html=True)
-
 # Custom CSS with space theme and glowing text
-
 st.markdown("""
 <style>
-    /* Styles for the collapsed sidebar control */
-    [data-testid="collapsedControl"] {
-        position: relative;
-        z-index: 1000;
+
+/* Import Orbitron font */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+/* Global Styles */
+body {
+    background-color: #0c0c1d;
+    color: #e0e0ff;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.stApp {
+    background-image: url('https://wallpaperaccess.com/full/3861869.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+/* Hide Streamlit components */
+#MainMenu, header, footer {
+    visibility: hidden;
+}
+
+/* Title Styles */
+.title {
+    font-size: 48px;
+    font-weight: bold;
+    text-align: center;
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+    animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+.sidebar-title {
+    color: #00ffff;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Glow Animation */
+@keyframes glow {
+    from {
+        text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+    }
+    to {
+        text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff;
+    }
+}
+
+/* Sidebar Styles */
+.sidebar .sidebar-content {
+    background-color: rgba(12, 12, 29, 0.8);
+}
+
+/* Button Styles */
+.stButton > button {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    border-radius: 20px;
+    border: 2px solid #45a049;
+    transition: all 0.3s;
+}
+
+.stButton > button:hover {
+    background-color: #45a049;
+    box-shadow: 0 0 10px #4CAF50;
+}
+
+/* Input Styles */
+.stTextInput > div > div > input {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #e0e0ff;
+    border: 1px solid #00ffff;
+    border-radius: 10px;
+}
+
+.stSelectbox > div > div > select {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #e0e0ff;
+    border: 1px solid #00ffff;
+    border-radius: 10px;
+}
+
+/* Section Styles */
+.api-section {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.api-title {
+    color: #00ffff;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Sidebar Toggle Button Styles */
+[data-testid="collapsedControl"] {
+    position: relative;
+    z-index: 1000;
+}
+
+[data-testid="collapsedControl"] svg {
+    fill: #00ffff !important;
+    filter: drop-shadow(0 0 5px #00ffff);
+    transition: filter 0.3s ease-in-out;
+}
+
+[data-testid="collapsedControl"]:hover svg {
+    filter: drop-shadow(0 0 10px #00ffff);
+}
+
+/* Tap Text Styles */
+[data-testid="collapsedControl"]::after {
+    content: 'tap';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 10px;
+    font-size: 14px;
+    color: #00ffff;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2px 5px;
+    border-radius: 5px;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Hide tap text when sidebar is expanded */
+.css-1544g2n [data-testid="collapsedControl"]::after {
+    opacity: 0;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 767px) {
+    .title {
+        font-size: 36px;
     }
 
-    /* Glowing arrow effect */
-    [data-testid="collapsedControl"] svg {
-        fill: #00ffff !important;
-        filter: drop-shadow(0 0 5px #00ffff) drop-shadow(0 0 10px #00ffff);
-        animation: glow 1.5s ease-in-out infinite alternate;
+    .sidebar-title {
+        font-size: 20px;
     }
+}
 
-    /* Tap text next to the arrow */
+@media (min-width: 992px) {
     [data-testid="collapsedControl"]::after {
-        content: 'tap';
-        position: absolute;
-        left: 100%;
-        top: 50%;
-        transform: translateY(-50%);
-        margin-left: 10px;
-        font-size: 14px;
-        color: #00ffff;
-        background-color: rgba(0, 0, 0, 0.7);
-        padding: 2px 5px;
-        border-radius: 5px;
-        white-space: nowrap;
-        animation: glow 1.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes glow {
-        from {
-            filter: drop-shadow(0 0 5px #00ffff) drop-shadow(0 0 10px #00ffff);
-        }
-        to {
-            filter: drop-shadow(0 0 10px #00ffff) drop-shadow(0 0 20px #00ffff) drop-shadow(0 0 30px #00ffff);
-        }
-    }
-
-    /* Hide tap text when sidebar is expanded */
-    .css-1544g2n [data-testid="collapsedControl"]::after {
         display: none;
     }
+}
 
-    /* Hide on larger screens */
-    @media (min-width: 992px) {
-        [data-testid="collapsedControl"]::after {
-            display: none;
-        }
-    }
 </style>
+
 
 <script>
     function hideTapText() {
@@ -113,162 +211,6 @@ st.markdown("""
     }
 </script>
 """, unsafe_allow_html=True)
-
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-
-    body {
-        background-color: #0c0c1d;
-        color: #e0e0ff;
-        font-family: 'Orbitron', sans-serif;
-    }
-
-    .stApp {
-        background-image: url('https://wallpaperaccess.com/full/3861869.jpg');
-        background-size: cover;
-        background-attachment: fixed;
-    }
-
-    .title {
-        font-size: 48px;
-        font-weight: bold;
-        text-align: center;
-        color: #00ffff;
-        text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
-        animation: glow 1.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes glow {
-        from {
-            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
-        }
-        to {
-            text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff;
-        }
-    }
-
-    .sidebar .sidebar-content {
-        background-color: rgba(12, 12, 29, 0.8);
-    }
-
-    .stButton>button {
-        background-color: #4CAF50;
-        color: white;
-        font-weight: bold;
-        border-radius: 20px;
-        border: 2px solid #45a049;
-        transition: all 0.3s;
-    }
-
-    .stButton>button:hover {
-        background-color: #45a049;
-        box-shadow: 0 0 10px #4CAF50;
-    }
-
-    .stTextInput>div>div>input {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: #e0e0ff;
-        border: 1px solid #00ffff;
-        border-radius: 10px;
-    }
-
-    .stSelectbox>div>div>select {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: #e0e0ff;
-        border: 1px solid #00ffff;
-        border-radius: 10px;
-    }
-        /* Updated style for the sidebar toggle button and tap text */
-    [data-testid="collapsedControl"] {
-        position: relative;
-        z-index: 1;
-    }
-    
-    [data-testid="collapsedControl"]::after {
-        content: 'tap';
-        position: absolute;
-        left: 100%;
-        top: 50%;
-        transform: translateY(-50%);
-        margin-left: 10px;
-        font-size: 14px;
-        color: #00ffff;
-        background-color: rgba(0, 0, 0, 0.7);
-        padding: 2px 5px;
-        border-radius: 5px;
-        white-space: nowrap;
-        animation: glow 1.5s ease-in-out infinite alternate;
-        z-index: 1000;
-    }
-    
-    @keyframes glow {
-        from {
-            text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
-        }
-        to {
-            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
-        }
-    }
-    
-    /* Hide tap text when sidebar is expanded */
-    .css-1544g2n [data-testid="collapsedControl"]::after {
-        display: none;
-    }
-    
-    @media (min-width: 992px) {
-        [data-testid="collapsedControl"]::after {
-            display: none;
-        }
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Custom CSS
-st.markdown("""
-<style>
-
-    .title {
-        color: #1a1a1a;
-        font-size: 36px;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-
-    .sidebar-title {
-        color: #1a1a1a;
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-
-    .api-section {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-    }
-
-    .api-title {
-        color: #1a1a1a;
-        font-size: 28px;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-
-    @media (max-width: 767px) {
-        .title {
-            font-size: 24px;
-        }
-
-        .sidebar-title {
-            font-size: 20px;
-        }
-
-</style>
-""", unsafe_allow_html=True)
-
 
 
 # Sidebar
