@@ -368,7 +368,7 @@ elif api_choice == "Asteroids NeoWs":
             col1, col2 = st.columns([1, 2])
             with col1:
                 # Display a generic asteroid image
-                st.image("https://www.nasa.gov/sites/default/files/thumbnails/image/asteroid20180605-16.jpg",
+                st.image("https://imgs.search.brave.com/R4nwYmQBrjXwn9eFINYFwNCPWMftnLb8_MdiDwH55GI/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJjYXZlLmNv/bS93cC9tS3FqVk82/LmpwZw",
                          caption="Generic Asteroid Image (NASA)")
             with col2:
                 st.json(asteroid_info)
