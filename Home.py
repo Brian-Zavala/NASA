@@ -709,7 +709,7 @@ elif api_choice == "EONET":
                         popup=f"<b>{event['title']}</b><br>Date: {event['date']}<br><a href='{event['source']}' target='_blank'>More Info</a>",
                         tooltip=f"{event['category']}: {event['title']}"
                     ).add_to(m)
-                display_folium_map(m, height=500)
+                folium_static(m, width=700, height=500)
 
                 # Events table
                 st.subheader("Filtered Events")
