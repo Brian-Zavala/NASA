@@ -398,7 +398,7 @@ elif api_choice == "Mars Rover Photos":
     camera = st.selectbox("Select Camera (optional)", ["All"] + list(cameras.keys()))
     camera_param = f"&camera={camera.lower()}" if camera != "All" else ""
 
-    page = st.number_input("Page", min_value=1, value=1, step=1, key="page_number")
+    page = st.number_input("Page", min_value=0, value=0, step=1, key="page_number")
 
     # Fetch photos when any parameter changes
     fetch_and_display_photos(api_key, rover, date_param, camera_param, page)
