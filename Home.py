@@ -430,10 +430,15 @@ elif api_choice == "Earth Imagery":
     dim = st.slider("Image Resolution (degrees)", min_value=0.01, max_value=0.3, value=0.15, step=0.01,
                     help="Higher values result in a larger area but lower resolution. Lower values give higher resolution but cover a smaller area.")
 
-    # Create a map to show the selected location
-    location_map = folium.Map(location=[lat, lon], zoom_start=4)
-    folium.Marker([lat, lon], popup="Selected Location").add_to(location_map)
-    st_folium(location_map, width=140, height=180)
+    col1 = st.columns(1)[0]
+
+    with col1:
+        # Create a map to show the selected location
+        location_map = folium.Map(location=[lat, lon], zoom_start=4)
+        folium.Marker([lat, lon], popup="Selected Location").add_to(location_map)
+
+        # folium_static for better responsiveness
+        folium_static(location_map, width=300, height=200)
 
     if st.button("Fetch Earth Imagery"):
         with st.spinner("Fetching Earth imagery..."):
