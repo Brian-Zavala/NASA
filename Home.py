@@ -46,6 +46,7 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
 /* Global Styles */
+
 /* Improve text visibility on iOS */
 body {
     -webkit-font-smoothing: antialiased;
@@ -227,6 +228,14 @@ body {
     }
 }
 
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+    * {
+       overflow-anchor: none !important;
+       }
 </style>
 """, unsafe_allow_html=True)
 
