@@ -569,7 +569,8 @@ elif api_choice == "Earth Imagery":
         location_map = folium.Map(location=[lat, lon], zoom_start=4)
         folium.Marker([lat, lon], popup="Selected Location").add_to(location_map)
 
-        display_folium_map(location_map, height=500)
+        # folium_static for better responsiveness
+        folium_static(location_map, width=300, height=200)
 
     if st.button("Fetch Earth Imagery"):
         with st.spinner("Fetching Earth imagery..."):
