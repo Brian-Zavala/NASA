@@ -211,34 +211,29 @@ def fetch_earth_assets(api_key, lat, lon, date):
 
 
 def create_ufo_image():
-    img = Image.new('RGBA', (75, 50), (255, 255, 255, 0))
+    img = Image.new('RGBA', (24, 16), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
 
     # Main body
-    draw.ellipse([2, 20, 73, 45], fill=(180, 180, 180, 200))
+    draw.ellipse([1, 6, 23, 14], fill=(180, 180, 180, 200))
 
     # Glass dome
-    for i in range(10):
-        alpha = int(150 - i * 10)  # Gradually decrease alpha for glass effect
-        draw.ellipse([20 + i / 4, 10 + i / 2, 55 - i / 4, 27 - i / 4], fill=(200, 255, 255, alpha))
+    draw.ellipse([6, 3, 18, 9], fill=(200, 255, 255, 150))
 
     # Dome outline
-    draw.arc([20, 10, 55, 27], 0, 180, fill=(100, 100, 100, 200), width=1)
+    draw.arc([6, 3, 18, 9], 0, 180, fill=(100, 100, 100, 200), width=1)
 
-    # Windows
-    draw.ellipse([17, 22, 27, 32], fill=(0, 255, 255, 180))
-    draw.ellipse([32, 22, 42, 32], fill=(0, 255, 255, 180))
-    draw.ellipse([47, 22, 57, 32], fill=(0, 255, 255, 180))
+    # Windows (simplified to dots)
+    for x in [7, 12, 17]:
+        draw.point([x, 8], fill=(0, 255, 255, 180))
 
-    # Bottom lights
-    for i, x in enumerate([15, 37, 60]):
-        draw.ellipse([x - 1, 42, x + 1, 45], fill=(255, 255, 0, 200))
+    # Bottom lights (simplified to dots)
+    for x in [5, 12, 19]:
+        draw.point([x, 13], fill=(255, 255, 0, 200))
 
     buffered = io.BytesIO()
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
-
-
 
 def display_folium_map(m, height):
     st_folium(m, width=None, height=height)
