@@ -9,26 +9,69 @@ from streamlit_folium import folium_static
 from datetime import datetime, timedelta, timezone
 from functions import (fetch_apod_data, display_folium_map, fetch_earth_imagery, fetch_eonet_events,
                        fetch_asteroid_data, fetch_earth_assets, fetch_and_display_photos, get_camera_options,
-                       fetch_epic_data, process_eonet_data)
+                       fetch_epic_data, process_eonet_data, create_ufo_image)
 
 # Set page config
 st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide", initial_sidebar_state="auto")
 
+# Create UFO image
+ufo_image = create_ufo_image()
+
+# Add custom CSS
+st.markdown(f"""
+<style>
+    @keyframes fly {{
+        0% {{ left: -150px; top: 10%; }}
+        25% {{ left: 25%; top: 20%; }}
+        50% {{ left: 50%; top: 10%; }}
+        75% {{ left: 75%; top: 20%; }}
+        100% {{ left: calc(100% + 150px); top: 10%; }}
+    }}
+    .flying-ufo {{
+        position: fixed;
+        width: 150px;
+        height: 90px;
+        background-image: url("data:image/png;base64,{ufo_image}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        z-index: 0;
+        animation: fly 40s linear infinite;
+        pointer-events: none;
+    }}
+    .stApp {{
+        background-image: url("https://wallpaperaccess.com/full/3861869.jpg");
+        background-size: cover;
+        background-attachment: fixed;
+    }}
+    .main-content {{
+        background-color: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }}
+    .sidebar .sidebar-content {{
+        background-color: rgba(0, 0, 0, 0.7);
+    }}
+</style>
+<div class="flying-ufo"></div>
+""", unsafe_allow_html=True)
+
 # Add JavaScript to handle scrolling issues on iOS
 st.markdown("""
 <script>
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
     const preventScroll = (e) => {
         e.preventDefault();
         e.stopPropagation();
     };
 
     const appElement = document.querySelector('.stApp');
+    const sidebarElement = document.querySelector('[data-testid="stSidebar"]');
+
     if (appElement) {
         appElement.addEventListener('touchmove', preventScroll, { passive: false });
     }
 
-    const sidebarElement = document.querySelector('[data-testid="stSidebar"]');
     if (sidebarElement) {
         sidebarElement.addEventListener('touchmove', (e) => {
             e.stopPropagation();
@@ -42,55 +85,25 @@ document.addEventListener('DOMContentLoaded', (event) => {
 st.markdown("""
 <style>
 
-/* Import Orbitron font */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-/* Global Styles */
+:root {
+    --main-bg-color: #0c0c1d;
+    --text-color: #e0e0ff;
+    --glow-color: #00ffff;
+    --sidebar-bg: rgba(255, 0, 0, 0.1);
+    --button-bg: #4CAF50;
+    --button-hover: #45a049;
+}
 
-/* Improve text visibility on iOS */
 body {
+    background-color: var(--main-bg-color);
+    color: var(--text-color);
+    font-family: 'Orbitron', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Improve text readability in sidebar */
-[data-testid="stSidebar"] > div:first-child {
-    background-color: rgba(255, 0, 0, 0.1);  /* More opaque background */
-}
-
-/* Ensure text has proper contrast */
-.title, .sidebar-title, .stButton > button, .stTextInput > div > div > input, .stSelectbox > div > div > select {
-    color: #e0e0ff !important;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);  /* Add text shadow for better readability */
-}
-[data-testid="column"] > div:has(> iframe) {
-    width: 100%;
-    height: 100%;
-}
-
-[data-testid="column"] > div:has(> iframe) > iframe {
-    width: 100%;
-    height: 100%;
-}
-
-body {
-    background-color: #0c0c1d;
-    color: #e0e0ff;
-    font-family: 'Orbitron', sans-serif;
-}
-    /* Glowy red background for sidebar */
-    [data-testid="stSidebar"] > div:first-child {
-        background-image: linear-gradient(to bottom, rgba(255,0,0,0.15), rgba(255,0,0,0.05));
-        box-shadow: inset 0 0 30px rgba(255, 0, 0, 0.2);
-        border-right: 1px solid rgba(255, 0, 0, 0.2);
-    }
-
-
-    /* Ensure sidebar content is above the glow */
-    [data-testid="stSidebar"] > div:first-child > div:first-child {
-        position: relative;
-        z-index: 1;
-    }
 .stApp {
     background-image: url('https://wallpaperaccess.com/full/3861869.jpg');
     background-size: cover;
@@ -107,60 +120,51 @@ body {
     font-size: 48px;
     font-weight: bold;
     text-align: center;
-    color: #00ffff;
-    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+    color: var(--glow-color);
+    text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color), 0 0 30px var(--glow-color);
     animation: glow 1.5s ease-in-out infinite alternate;
 }
 
+@keyframes glow {
+    from { text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color), 0 0 30px var(--glow-color); }
+    to { text-shadow: 0 0 20px var(--glow-color), 0 0 30px var(--glow-color), 0 0 40px var(--glow-color); }
+}
+
+/* Sidebar Styles */
+[data-testid="stSidebar"] > div:first-child {
+    background-image: linear-gradient(to bottom, rgba(255,0,0,0.15), rgba(255,0,0,0.05));
+    box-shadow: inset 0 0 30px rgba(255, 0, 0, 0.2);
+    border-right: 1px solid rgba(255, 0, 0, 0.2);
+}
+
 .sidebar-title {
-    color: #00ffff;
+    color: var(--glow-color);
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 10px;
 }
 
-/* Glow Animation */
-@keyframes glow {
-    from {
-        text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
-    }
-    to {
-        text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff;
-    }
-}
-
-/* Sidebar Styles */
-.sidebar .sidebar-content {
-    background-color: rgba(12, 12, 29, 0.8);
-}
-
 /* Button Styles */
 .stButton > button {
-    background-color: #4CAF50;
+    background-color: var(--button-bg);
     color: white;
     font-weight: bold;
     border-radius: 20px;
-    border: 2px solid #45a049;
+    border: 2px solid var(--button-hover);
     transition: all 0.3s;
 }
 
 .stButton > button:hover {
-    background-color: #45a049;
-    box-shadow: 0 0 10px #4CAF50;
+    background-color: var(--button-hover);
+    box-shadow: 0 0 10px var(--button-bg);
 }
 
 /* Input Styles */
-.stTextInput > div > div > input {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #e0e0ff;
-    border: 1px solid #00ffff;
-    border-radius: 10px;
-}
-
+.stTextInput > div > div > input,
 .stSelectbox > div > div > select {
     background-color: rgba(255, 255, 255, 0.1);
-    color: #e0e0ff;
-    border: 1px solid #00ffff;
+    color: var(--text-color);
+    border: 1px solid var(--glow-color);
     border-radius: 10px;
 }
 
@@ -174,7 +178,7 @@ body {
 }
 
 .api-title {
-    color: #00ffff;
+    color: var(--glow-color);
     font-size: 28px;
     font-weight: bold;
     margin-bottom: 10px;
@@ -187,13 +191,13 @@ body {
 }
 
 [data-testid="collapsedControl"] svg {
-    fill: #00ffff !important;
-    filter: drop-shadow(0 0 5px #00ffff);
+    fill: var(--glow-color) !important;
+    filter: drop-shadow(0 0 5px var(--glow-color));
     transition: filter 0.3s ease-in-out;
 }
 
 [data-testid="collapsedControl"]:hover svg {
-    filter: drop-shadow(0 0 10px #00ffff);
+    filter: drop-shadow(0 0 10px var(--glow-color));
 }
 
 /* Tap Text Styles */
@@ -205,7 +209,7 @@ body {
     transform: translateY(-50%);
     margin-left: 10px;
     font-size: 14px;
-    color: #00ffff;
+    color: var(--glow-color);
     background-color: rgba(0, 0, 0, 0.7);
     padding: 2px 5px;
     border-radius: 5px;
@@ -214,11 +218,11 @@ body {
     transition: opacity 0.3s ease-in-out;
 }
 
-/* Hide tap text when sidebar is expanded */
 .css-1544g2n [data-testid="collapsedControl"]::after {
     opacity: 0;
 }
 
+/* Image Styles */
 img {
     max-width: 100%;
     height: auto;
@@ -226,24 +230,23 @@ img {
     margin: 0 auto;
 }
 
-/* Responsive container for images */
 .responsive-img-container {
     width: 100%;
-    max-width: 800px;  /* Adjust this value as needed */
+    max-width: 800px;
     margin: 0 auto;
     overflow: hidden;
 }
 
-/* Ensure Plotly charts are responsive */
+/* Chart Styles */
 .plotly-graph-div {
     width: 100% !important;
 }
 
-/* Make Folium maps responsive */
+/* Map Styles */
 .folium-map {
     width: 100% !important;
     height: 0 !important;
-    padding-bottom: 75% !important;  /* Adjust this value for desired aspect ratio */
+    padding-bottom: 75% !important;
     position: relative !important;
 }
 
@@ -254,6 +257,7 @@ img {
     left: 0 !important;
     top: 0 !important;
 }
+
 /* Responsive Styles */
 @media (max-width: 767px) {
     .title {
@@ -269,6 +273,41 @@ img {
     [data-testid="collapsedControl"]::after {
         display: none;
     }
+}
+
+/* Ensure proper sizing for columns with iframes */
+[data-testid="column"] > div:has(> iframe) {
+    width: 100%;
+    height: 100%;
+}
+
+[data-testid="column"] > div:has(> iframe) > iframe {
+    width: 100%;
+    height: 100%;
+}
+
+/* Improve text visibility and contrast */
+.title, .sidebar-title, .stButton > button, .stTextInput > div > div > input, .stSelectbox > div > div > select {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Prevent unwanted scrolling behavior */
+* {
+    overflow-anchor: none !important;
+}
+
+/* Alien Animation */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+.alien {
+    font-size: 80px;
+    animation: float 3s ease-in-out infinite;
+    text-align: center;
+    margin-bottom: -64px;
 }
 
 </style>
@@ -290,24 +329,6 @@ with st.sidebar:
     api_choice = st.selectbox("Choose an API",
                               ["APOD", "Mars Rover Photos", "Asteroids NeoWs", "EPIC", "Earth Imagery", "EONET"])
 
-# Alien animation in sidebar
-alien_animation = """
-<style>
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
-}
-.alien {
-    font-size: 80px;
-    animation: float 3s ease-in-out infinite;
-    text-align: center;
-    margin-bottom: -64px;
-}
-</style>
-<div class="alien">👽</div>
-"""
-st.sidebar.markdown(alien_animation, unsafe_allow_html=True)
 
 # Main app
 st.markdown('<p class="title">Space Explorer 🛸</p>', unsafe_allow_html=True)
@@ -740,4 +761,30 @@ elif api_choice == "EONET":
 st.sidebar.markdown("---")
 st.sidebar.info(
     "This app uses NASA's public APIs to explore various space and Earth science data. Enter your API key for full access, or use key provided for limited access.")
-st.sidebar.warning("Note: Using key provided may result in rate limiting.")
+
+st.sidebar.subheader("🌟 Did You Know?")
+space_facts = [
+    "The Sun makes up 99.86% of the mass in our solar system.",
+    "One day on Venus is longer than one year on Earth.",
+    "The footprints on the Moon will be there for 100 million years.",
+    "There is a planet made of diamonds twice the size of Earth.",
+    "The largest known star, VY Canis Majoris, is 1,400 times larger than our Sun."
+]
+st.sidebar.info(space_facts[int(datetime.now().timestamp()) % len(space_facts)])
+
+
+
+# Easter egg: Konami Code
+st.markdown("""
+<script>
+let keys = [];
+const konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+document.addEventListener('keydown', (e) => {
+    keys.push(e.keyCode);
+    keys = keys.slice(-10);
+    if (keys.join(',') === konami.join(',')) {
+        alert('🎉 You found the Easter egg! Enjoy this cosmic joke: Why did the sun go to school? To get brighter!');
+    }
+});
+</script>
+""", unsafe_allow_html=True)

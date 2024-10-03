@@ -1,6 +1,8 @@
+import base64
+import io
 import streamlit as st
 import requests
-from PIL import Image
+from PIL import Image, ImageDraw
 import pandas as pd
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -208,10 +210,34 @@ def fetch_earth_assets(api_key, lat, lon, date):
     return response.json()
 
 
-# Function to load an image from a URL
-def load_image_from_url(url):
-    response = requests.get(url)
-    return Image.open(BytesIO(response.content))
+def create_ufo_image():
+    img = Image.new('RGBA', (150, 100), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Main body
+    draw.ellipse([5, 40, 145, 90], fill=(180, 180, 180, 200))
+
+    # Glass dome
+    for i in range(20):
+        alpha = int(150 - i * 5)  # Gradually decrease alpha for glass effect
+        draw.ellipse([40 + i / 2, 20 + i, 110 - i / 2, 55 - i / 2], fill=(200, 255, 255, alpha))
+
+    # Dome outline
+    draw.arc([40, 20, 110, 55], 0, 180, fill=(100, 100, 100, 200), width=2)
+
+    # Windows
+    draw.ellipse([35, 45, 55, 65], fill=(0, 255, 255, 180))
+    draw.ellipse([65, 45, 85, 65], fill=(0, 255, 255, 180))
+    draw.ellipse([95, 45, 115, 65], fill=(0, 255, 255, 180))
+
+    # Bottom lights
+    for i, x in enumerate([30, 75, 120]):
+        draw.ellipse([x - 3, 85, x + 3, 91], fill=(255, 255, 0, 200))
+
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode()
+
 
 
 def display_folium_map(m, height):
