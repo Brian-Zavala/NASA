@@ -29,8 +29,8 @@ st.markdown(f"""
     }}
     .flying-ufo {{
         position: fixed;
-        width: 150px;
-        height: 90px;
+        width: 40px;
+        height: 10px;
         background-image: url("data:image/png;base64,{ufo_image}");
         background-size: contain;
         background-repeat: no-repeat;
@@ -38,6 +38,7 @@ st.markdown(f"""
         animation: fly 40s linear infinite;
         pointer-events: none;
     }}
+    
     .stApp {{
         background-image: url("https://wallpaperaccess.com/full/3861869.jpg");
         background-size: cover;
