@@ -14,6 +14,8 @@ from functions import (fetch_apod_data, fetch_earth_imagery, fetch_eonet_events,
 # Set page config
 st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide")
 
+
+
 # Hide Streamlit toolbar
 st.markdown("""
 <style>
@@ -24,6 +26,94 @@ footer {visibility: hidden;}
 """, unsafe_allow_html=True)
 
 # Custom CSS with space theme and glowing text
+
+st.markdown("""
+<style>
+    /* Styles for the collapsed sidebar control */
+    [data-testid="collapsedControl"] {
+        position: relative;
+        z-index: 1000;
+    }
+
+    /* Glowing arrow effect */
+    [data-testid="collapsedControl"] svg {
+        fill: #00ffff !important;
+        filter: drop-shadow(0 0 5px #00ffff) drop-shadow(0 0 10px #00ffff);
+        animation: glow 1.5s ease-in-out infinite alternate;
+    }
+
+    /* Tap text next to the arrow */
+    [data-testid="collapsedControl"]::after {
+        content: 'tap';
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 10px;
+        font-size: 14px;
+        color: #00ffff;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 2px 5px;
+        border-radius: 5px;
+        white-space: nowrap;
+        animation: glow 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+        from {
+            filter: drop-shadow(0 0 5px #00ffff) drop-shadow(0 0 10px #00ffff);
+        }
+        to {
+            filter: drop-shadow(0 0 10px #00ffff) drop-shadow(0 0 20px #00ffff) drop-shadow(0 0 30px #00ffff);
+        }
+    }
+
+    /* Hide tap text when sidebar is expanded */
+    .css-1544g2n [data-testid="collapsedControl"]::after {
+        display: none;
+    }
+
+    /* Hide on larger screens */
+    @media (min-width: 992px) {
+        [data-testid="collapsedControl"]::after {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+    function hideTapText() {
+        const control = document.querySelector('[data-testid="collapsedControl"]');
+        if (control) {
+            control.style.setProperty('--after-content', 'none');
+        }
+    }
+
+    // Reshow tap text when sidebar is collapsed
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const sidebarElement = document.querySelector('.css-1544g2n');
+                const control = document.querySelector('[data-testid="collapsedControl"]');
+                if (sidebarElement && control) {
+                    if (sidebarElement.classList.contains('--collapsed')) {
+                        control.style.removeProperty('--after-content');
+                    } else {
+                        control.style.setProperty('--after-content', 'none');
+                    }
+                }
+            }
+        });
+    });
+
+    const config = { attributes: true, childList: false, subtree: false };
+    const sidebarElement = document.querySelector('.css-1544g2n');
+    if (sidebarElement) {
+        observer.observe(sidebarElement, config);
+    }
+</script>
+""", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
@@ -89,28 +179,60 @@ st.markdown("""
         border: 1px solid #00ffff;
         border-radius: 10px;
     }
+        /* Updated style for the sidebar toggle button and tap text */
+    [data-testid="collapsedControl"] {
+        position: relative;
+        z-index: 1;
+    }
+    
+    [data-testid="collapsedControl"]::after {
+        content: 'tap';
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 10px;
+        font-size: 14px;
+        color: #00ffff;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 2px 5px;
+        border-radius: 5px;
+        white-space: nowrap;
+        animation: glow 1.5s ease-in-out infinite alternate;
+        z-index: 1000;
+    }
+    
+    @keyframes glow {
+        from {
+            text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+        }
+        to {
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+        }
+    }
+    
+    /* Hide tap text when sidebar is expanded */
+    .css-1544g2n [data-testid="collapsedControl"]::after {
+        display: none;
+    }
+    
+    @media (min-width: 992px) {
+        [data-testid="collapsedControl"]::after {
+            display: none;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # Custom CSS
 st.markdown("""
 <style>
-    body {
-        font-family: 'Open Sans', sans-serif;
-        color: #333333;
-    }
 
     .title {
         color: #1a1a1a;
         font-size: 36px;
         font-weight: bold;
         margin-bottom: 20px;
-    }
-
-    .sidebar {
-        background-color: #f2f2f2;
-        padding: 20px;
-        border-radius: 10px;
     }
 
     .sidebar-title {
@@ -135,21 +257,6 @@ st.markdown("""
         margin-bottom: 10px;
     }
 
-    .button {
-        background-color: #ff5722;
-        color: #ffffff;
-        border: none;
-        border-radius: 4px;
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .button:hover {
-        background-color: #f44336;
-    }
-
     @media (max-width: 767px) {
         .title {
             font-size: 24px;
@@ -159,24 +266,19 @@ st.markdown("""
             font-size: 20px;
         }
 
-        .api-title {
-            font-size: 22px;
-        }
-
-        .button {
-            font-size: 14px;
-            padding: 8px 16px;
-        }
-    }
 </style>
 """, unsafe_allow_html=True)
 
+
+
 # Sidebar
-st.sidebar.markdown('<p class="title">Mission Control</p>', unsafe_allow_html=True)
-api_key = st.sidebar.text_input("Enter your NASA API key", placeholder="Demo_key",
-                                value="kK3QAv8cS9Lcy00gBb8qRiC2Is076W5P96H9cEax", type="password")
-api_choice = st.sidebar.selectbox("Choose an API",
-                                  ["APOD", "Mars Rover Photos", "Asteroids NeoWs", "EPIC", "Earth Imagery", "EONET"])
+with st.sidebar:
+    st.markdown('<p class="title">Mission Control</p>', unsafe_allow_html=True)
+    api_key = st.text_input("Enter your NASA API key", placeholder="Demo_key",
+                            value="kK3QAv8cS9Lcy00gBb8qRiC2Is076W5P96H9cEax", type="password")
+    api_choice = st.selectbox("Choose an API",
+                              ["APOD", "Mars Rover Photos", "Asteroids NeoWs", "EPIC", "Earth Imagery", "EONET"])
+
 
 # Alien animation in sidebar
 alien_animation = """
@@ -198,7 +300,7 @@ alien_animation = """
 st.sidebar.markdown(alien_animation, unsafe_allow_html=True)
 
 # Main app
-st.markdown('<p class="title">🌌 Space Explorer 🛸</p>', unsafe_allow_html=True)
+st.markdown('<p class="title">Space Explorer 🛸</p>', unsafe_allow_html=True)
 
 if api_choice == "APOD":
     st.header("Astronomy Picture of the Day")
@@ -257,13 +359,24 @@ elif api_choice == "Mars Rover Photos":
 
     rover = "Curiosity"  # We're focusing only on Curiosity
 
+    # Add information about the relationship between Sol and Earth date
+    st.info("Note: Sol 0 for Curiosity corresponds to August 6, 2012 (Earth date). Each Sol is approximately 24 hours and 39 minutes long.")
+
     search_type = st.radio("Search by", ["Martian Sol", "Earth Date"])
 
     if search_type == "Martian Sol":
         sol = st.number_input("Enter Sol (Martian day)", min_value=0, value=1000, step=1)
+        # Calculate approximate Earth date
+        earth_date = datetime(2012, 8, 6) + timedelta(days=sol)
+        st.write(f"Approximate corresponding Earth date: {earth_date.strftime('%Y-%m-%d')}")
         date_param = f"sol={sol}"
     else:
-        earth_date = st.date_input("Select Earth Date")
+        min_date = datetime(2012, 8, 6)
+        max_date = datetime.now()
+        earth_date = st.date_input("Select Earth Date", min_value=min_date, max_value=max_date, value=min_date)
+        # Calculate approximate Sol
+        sol = (earth_date - datetime(2012, 8, 6).date()).days
+        st.write(f"Approximate corresponding Sol: {sol}")
         date_param = f"earth_date={earth_date}"
 
     cameras = get_camera_options()

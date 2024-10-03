@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 
 
+
 @st.cache_data(ttl=3600)  # Cache for 1 hour
 def fetch_apod_data(api_key, date=None, start_date=None, end_date=None, count=None, thumbs=False):
     url = f"https://api.nasa.gov/planetary/apod?api_key={api_key}"
