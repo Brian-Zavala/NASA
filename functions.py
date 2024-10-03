@@ -210,7 +210,7 @@ def fetch_earth_assets(api_key, lat, lon, date):
     return response.json()
 
 
-def create_small_ufo_image():
+def create_ufo_image():
     img = Image.new('RGBA', (75, 50), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
 
