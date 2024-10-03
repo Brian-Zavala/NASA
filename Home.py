@@ -379,7 +379,7 @@ elif api_choice == "Mars Rover Photos":
     search_type = st.radio("Search by", ["Martian Sol", "Earth Date"])
 
     if search_type == "Martian Sol":
-        sol = st.number_input("Enter Sol (Martian day)", min_value=0, value=1000, step=1)
+        sol = st.number_input("Enter Sol (Martian day)", min_value=0, value=0, step=1)
         # Calculate approximate Earth date
         earth_date = datetime(2012, 8, 6) + timedelta(days=sol)
         st.write(f"Approximate corresponding Earth date: {earth_date.strftime('%Y-%m-%d')}")
