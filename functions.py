@@ -167,10 +167,7 @@ def fetch_and_display_photos(api_key, rover, date_param, camera_param, page):
                 cols = st.columns(3)
                 for i, photo in enumerate(photos):
                     with cols[i % 3]:
-                        st.markdown('<div class="responsive-img-container">', unsafe_allow_html=True)
-                        st.image(photo["img_src"], caption=f"Photo {i + 1} - Camera: {photo['camera']['full_name']}",
-                                 use_column_width=True)
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        st.image(photo["img_src"], caption=f"Photo {i + 1} - Camera: {photo['camera']['full_name']}")
 
                 # Create a dataframe of all photos for download
                 photos_df = pd.DataFrame(photos)
