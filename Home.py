@@ -217,7 +217,7 @@ if api_choice == "APOD":
             apod_data = [apod_data]
 
     elif apod_mode == "Date Range":
-        start_date = st.date_input("Start date", datetime.now() - timedelta(days=7))
+        start_date = st.date_input("Start date", datetime.now() - timedelta(days=8))
         end_date = st.date_input("End date", datetime.now())
         if start_date <= end_date:
             apod_data = fetch_apod_data(api_key, start_date=start_date.strftime("%Y-%m-%d"),
