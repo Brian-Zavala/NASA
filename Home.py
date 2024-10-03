@@ -12,7 +12,7 @@ from functions import (fetch_apod_data, display_folium_map, fetch_earth_imagery,
                        fetch_epic_data, process_eonet_data, create_ufo_image)
 
 # Set page config
-st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide", initial_sidebar_state="auto")
+st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide", initial_sidebar_state="expanded")
 
 # Create UFO image
 ufo_image = create_ufo_image()
@@ -53,6 +53,7 @@ st.markdown(f"""
     .sidebar .sidebar-content {{
         background-color: rgba(0, 0, 0, 0.7);
     }}
+    
 </style>
 <div class="flying-ufo"></div>
 """, unsafe_allow_html=True)
