@@ -26,7 +26,7 @@ def fetch_apod_data(api_key, date=None, start_date=None, end_date=None, count=No
     return response.json()
 
 
-def fetch_mars_rover_photos(api_key, rover, date_param, camera=None, page=0):
+def fetch_mars_rover_photos(api_key, rover, date_param, camera=None, page=1):
     url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover}/photos"
     params = {
         "api_key": api_key,
@@ -115,7 +115,6 @@ def fetch_earth_data_search(query, limit=10):
     return response.json()
 
 
-@st.cache_data(ttl=3600)  # Cache for 1 hour
 def fetch_earth_imagery(api_key, lat, lon, date, dim=0.15):
     url = f"https://api.nasa.gov/planetary/earth/imagery"
     params = {
@@ -135,14 +134,16 @@ def fetch_earth_imagery(api_key, lat, lon, date, dim=0.15):
     except IOError as e:
         return {"error": f"Failed to process image: {str(e)}"}, None
 
+
 # Function to fetch and display photos
 def fetch_and_display_photos(api_key, rover, date_param, camera_param, page):
     url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover.lower()}/photos?{date_param}{camera_param}&page={page}&api_key={api_key}"
 
     with st.spinner("Fetching Mars Rover photos..."):
-        response = requests.get(url)
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # This will raise an HTTPError for bad responses
 
-        if response.status_code == 200:
             data = response.json()
             photos = data.get("photos", [])
 
@@ -176,11 +177,12 @@ def fetch_and_display_photos(api_key, rover, date_param, camera_param, page):
                     file_name=f"{rover}_photos.csv",
                     mime="text/csv",
                 )
-        else:
-            st.error(f"Error fetching data: {response.status_code} - {response.text}")
+        except requests.RequestException as e:
+            st.error(f"Error fetching data: {str(e)}")
+        except ValueError as e:
+            st.error(f"Error processing data: {str(e)}")
 
 
-@st.cache_data
 def get_camera_options():
     return {
         "FHAZ": "Front Hazard Avoidance Camera",
