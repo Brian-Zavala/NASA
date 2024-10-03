@@ -5,6 +5,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from io import BytesIO
 
+from streamlit_folium import st_folium
+
 
 @st.cache_data(ttl=3600)  # Cache for 1 hour
 def fetch_apod_data(api_key, date=None, start_date=None, end_date=None, count=None, thumbs=False):
@@ -213,3 +215,6 @@ def fetch_earth_assets(api_key, lat, lon, date):
 def load_image_from_url(url):
     response = requests.get(url)
     return Image.open(BytesIO(response.content))
+
+def display_folium_map(m, height):
+    st_folium(m, width=None, height=height)

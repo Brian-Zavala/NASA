@@ -7,7 +7,7 @@ import folium
 from PIL import Image
 from streamlit_folium import st_folium, folium_static
 from datetime import datetime, timedelta, timezone
-from functions import (fetch_apod_data, fetch_earth_imagery, fetch_eonet_events,
+from functions import (fetch_apod_data,display_folium_map, fetch_earth_imagery, fetch_eonet_events,
                        fetch_asteroid_data, fetch_earth_assets, fetch_and_display_photos, get_camera_options,
                        fetch_epic_data, process_eonet_data, load_image_from_url)
 
@@ -62,6 +62,15 @@ body {
 .title, .sidebar-title, .stButton > button, .stTextInput > div > div > input, .stSelectbox > div > div > select {
     color: #e0e0ff !important;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);  /* Add text shadow for better readability */
+}
+[data-testid="column"] > div:has(> iframe) {
+    width: 100%;
+    height: 100%;
+}
+
+[data-testid="column"] > div:has(> iframe) > iframe {
+    width: 100%;
+    height: 100%;
 }
 
 body {
@@ -446,7 +455,7 @@ elif api_choice == "Asteroids NeoWs":
                                   title="Asteroid Sizes",
                                   hover_data=["size"])
             fig_size.update_layout(height=600)
-            st.plotly_chart(fig_size)
+            st.plotly_chart(fig_size, use_container_width=True)
 
             # Closest approaches
             st.subheader("Closest Approaches")
@@ -635,7 +644,8 @@ elif api_choice == "Earth Imagery":
 
         # Display the map with the image overlay
         st.subheader("Image Overlay on Map")
-        st_folium(m, width=725, height=500)
+        display_folium_map(m, width="100%", height=500)
+
 
 elif api_choice == "EONET":
     st.header("Earth Observatory Natural Event Tracker (EONET)")
