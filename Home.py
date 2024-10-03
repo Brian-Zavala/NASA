@@ -431,7 +431,7 @@ elif api_choice == "Asteroids NeoWs":
 
             # Bar chart of asteroid counts
             fig = px.bar(df, x="date", y="count", title="Number of Near Earth Objects by Date")
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             total_asteroids = sum(df["count"])
             hazardous_asteroids = sum(1 for asteroid in all_asteroids if asteroid["is_potentially_hazardous_asteroid"])
@@ -489,7 +489,7 @@ elif api_choice == "Asteroids NeoWs":
                                                 'hazardous': 'Potentially Hazardous'},
                                         title="Asteroid Size Comparison")
                 fig_comparison.update_layout(xaxis={'categoryorder': 'total descending'})
-                st.plotly_chart(fig_comparison)
+                st.plotly_chart(fig_comparison, use_container_width=True)
 
             # Individual asteroid explorer
             st.subheader("Explore Individual Asteroids")
@@ -535,7 +535,7 @@ elif api_choice == "EPIC":
         df = pd.DataFrame({"lat": latitudes, "lon": longitudes})
         fig = px.scatter_geo(df, lat="lat", lon="lon", projection="natural earth")
         fig.update_layout(title="EPIC Image Locations")
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, use_container_width=True)
 
 elif api_choice == "Earth Imagery":
     st.header("Earth Imagery")
@@ -569,8 +569,7 @@ elif api_choice == "Earth Imagery":
         location_map = folium.Map(location=[lat, lon], zoom_start=4)
         folium.Marker([lat, lon], popup="Selected Location").add_to(location_map)
 
-        # folium_static for better responsiveness
-        folium_static(location_map, width=300, height=200)
+        display_folium_map(location_map, height=500)
 
     if st.button("Fetch Earth Imagery"):
         with st.spinner("Fetching Earth imagery..."):
@@ -641,7 +640,6 @@ elif api_choice == "Earth Imagery":
             opacity=0.6,
             name="Landsat 8 Image"
         ).add_to(m)
-
         # Display the map with the image overlay
         st.subheader("Image Overlay on Map")
         display_folium_map(m, height=500)
@@ -684,7 +682,7 @@ elif api_choice == "EONET":
                 # Event timeline
                 events_df['date'] = pd.to_datetime(events_df['date'])
                 fig_timeline = px.histogram(events_df, x="date", color="category", title="Event Timeline")
-                st.plotly_chart(fig_timeline)
+                st.plotly_chart(fig_timeline, use_container_width=True)
 
                 # Filtering options
                 st.subheader("Filter Events")
@@ -710,7 +708,7 @@ elif api_choice == "EONET":
                         popup=f"<b>{event['title']}</b><br>Date: {event['date']}<br><a href='{event['source']}' target='_blank'>More Info</a>",
                         tooltip=f"{event['category']}: {event['title']}"
                     ).add_to(m)
-                folium_static(m, width=700, height=500)
+                    display_folium_map(m, height=500)
 
                 # Events table
                 st.subheader("Filtered Events")
