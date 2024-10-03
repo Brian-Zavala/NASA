@@ -6,7 +6,7 @@ import plotly.express as px
 import folium
 from PIL import Image
 from streamlit_folium import st_folium, folium_static
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functions import (fetch_apod_data, fetch_earth_imagery, fetch_eonet_events,
                        fetch_asteroid_data, fetch_earth_assets, fetch_and_display_photos, get_camera_options,
                        fetch_epic_data, process_eonet_data)
@@ -205,20 +205,22 @@ if api_choice == "APOD":
 
     apod_mode = st.radio("Select APOD mode:", ["Today's APOD", "Specific Date", "Date Range", "Random Images"])
 
+    current_date = datetime.now(tz=timezone.utc) - timedelta(days=1)
+
     if apod_mode == "Today's APOD":
         apod_data = fetch_apod_data(api_key)
         if isinstance(apod_data, dict):
             apod_data = [apod_data]  # Convert single dict to list for consistent handling
 
     elif apod_mode == "Specific Date":
-        date = st.date_input("Select a date", datetime.now())
+        date = st.date_input("Select a date", current_date - timedelta(days=1))
         apod_data = fetch_apod_data(api_key, date=date.strftime("%Y-%m-%d"))
         if isinstance(apod_data, dict):
             apod_data = [apod_data]
 
     elif apod_mode == "Date Range":
-        start_date = st.date_input("Start date", datetime.now() - timedelta(days=8))
-        end_date = st.date_input("End date", datetime.now())
+        start_date = st.date_input("Start date", current_date - timedelta(days=7))
+        end_date = st.date_input("End date", current_date)
         if start_date <= end_date:
             apod_data = fetch_apod_data(api_key, start_date=start_date.strftime("%Y-%m-%d"),
                                         end_date=end_date.strftime("%Y-%m-%d"))
