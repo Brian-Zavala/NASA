@@ -678,7 +678,7 @@ elif api_choice == "EONET":
 
                 # Event categories pie chart
                 fig = px.pie(events_df, names="category", title="Event Categories")
-                st.plotly_chart(fig)
+                st.plotly_chart(fig, use_container_width=True)
 
                 # Event timeline
                 events_df['date'] = pd.to_datetime(events_df['date'])
@@ -709,7 +709,7 @@ elif api_choice == "EONET":
                         popup=f"<b>{event['title']}</b><br>Date: {event['date']}<br><a href='{event['source']}' target='_blank'>More Info</a>",
                         tooltip=f"{event['category']}: {event['title']}"
                     ).add_to(m)
-                    folium_static(m, width=700, height=500)
+                display_folium_map(m, height=500)
 
                 # Events table
                 st.subheader("Filtered Events")
