@@ -213,7 +213,7 @@ if api_choice == "APOD":
             apod_data = [apod_data]  # Convert single dict to list for consistent handling
 
     elif apod_mode == "Specific Date":
-        date = st.date_input("Select a date", current_date - timedelta(days=1))
+        date = st.date_input("Select a date", current_date)
         apod_data = fetch_apod_data(api_key, date=date.strftime("%Y-%m-%d"))
         if isinstance(apod_data, dict):
             apod_data = [apod_data]
