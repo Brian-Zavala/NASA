@@ -135,7 +135,6 @@ def fetch_earth_imagery(api_key, lat, lon, date, dim=0.15):
     except IOError as e:
         return {"error": f"Failed to process image: {str(e)}"}, None
 
-@st.cache_data(ttl=3600)
 # Function to fetch and display photos
 def fetch_and_display_photos(api_key, rover, date_param, camera_param, page):
     url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover.lower()}/photos?{date_param}{camera_param}&page={page}&api_key={api_key}"
