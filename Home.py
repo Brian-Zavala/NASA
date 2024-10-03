@@ -12,7 +12,7 @@ from functions import (fetch_apod_data, fetch_earth_imagery, fetch_eonet_events,
                        fetch_epic_data, process_eonet_data, load_image_from_url)
 
 # Set page config
-st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide", initial_sidebar_state="auto")
 
 
 # Custom CSS to position the logo
