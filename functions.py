@@ -206,3 +206,8 @@ def fetch_earth_assets(api_key, lat, lon, date):
     }
     response = requests.get(url, params=params)
     return response.json()
+
+# Function to load an image from a URL
+def load_image_from_url(url):
+    response = requests.get(url)
+    return Image.open(BytesIO(response.content))

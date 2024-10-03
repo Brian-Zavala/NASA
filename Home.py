@@ -9,12 +9,40 @@ from streamlit_folium import st_folium, folium_static
 from datetime import datetime, timedelta, timezone
 from functions import (fetch_apod_data, fetch_earth_imagery, fetch_eonet_events,
                        fetch_asteroid_data, fetch_earth_assets, fetch_and_display_photos, get_camera_options,
-                       fetch_epic_data, process_eonet_data)
+                       fetch_epic_data, process_eonet_data, load_image_from_url)
 
 # Set page config
-st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide", initial_sidebar_state="collapsed")
 
 
+# Custom CSS to position the logo
+st.markdown("""
+    <style>
+    #logo-container {
+        position: fixed;
+        top: 15px;
+        left: 15px;  /* Adjust this value to position the logo correctly next to the sidebar arrow */
+        z-index: 999;
+    }
+    #logo-container img {
+        max-height: 50px;  /* Adjust the size of your logo as needed */
+        width: auto;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# URL of your GIF
+gif_url = "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHdtOHFnYW01aTh0d2ljcXRhN244dHJqY3J3amwyZWowd2doNW1wcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/k7AEaKLU0maVvEpgPG/giphy.webp"
+
+# Load the GIF
+logo_gif = load_image_from_url(gif_url)
+
+# Display the logo
+st.markdown(f"""
+    <div id="logo-container">
+        <img src="{gif_url}" alt="Logo">
+    </div>
+    """, unsafe_allow_html=True)
 
 # Custom CSS with space theme and glowing text
 st.markdown("""
@@ -29,7 +57,19 @@ body {
     color: #e0e0ff;
     font-family: 'Orbitron', sans-serif;
 }
+    /* Glowy red background for sidebar */
+    [data-testid="stSidebar"] > div:first-child {
+        background-image: linear-gradient(to bottom, rgba(255,0,0,0.15), rgba(255,0,0,0.05));
+        box-shadow: inset 0 0 30px rgba(255, 0, 0, 0.2);
+        border-right: 1px solid rgba(255, 0, 0, 0.2);
+    }
 
+
+    /* Ensure sidebar content is above the glow */
+    [data-testid="stSidebar"] > div:first-child > div:first-child {
+        position: relative;
+        z-index: 1;
+    }
 .stApp {
     background-image: url('https://wallpaperaccess.com/full/3861869.jpg');
     background-size: cover;
@@ -177,41 +217,7 @@ body {
 }
 
 </style>
-
-
-<script>
-    function hideTapText() {
-        const control = document.querySelector('[data-testid="collapsedControl"]');
-        if (control) {
-            control.style.setProperty('--after-content', 'none');
-        }
-    }
-
-    // Reshow tap text when sidebar is collapsed
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const sidebarElement = document.querySelector('.css-1544g2n');
-                const control = document.querySelector('[data-testid="collapsedControl"]');
-                if (sidebarElement && control) {
-                    if (sidebarElement.classList.contains('--collapsed')) {
-                        control.style.removeProperty('--after-content');
-                    } else {
-                        control.style.setProperty('--after-content', 'none');
-                    }
-                }
-            }
-        });
-    });
-
-    const config = { attributes: true, childList: false, subtree: false };
-    const sidebarElement = document.querySelector('.css-1544g2n');
-    if (sidebarElement) {
-        observer.observe(sidebarElement, config);
-    }
-</script>
 """, unsafe_allow_html=True)
-
 
 # Sidebar
 with st.sidebar:
@@ -220,7 +226,6 @@ with st.sidebar:
                             value="kK3QAv8cS9Lcy00gBb8qRiC2Is076W5P96H9cEax", type="password")
     api_choice = st.selectbox("Choose an API",
                               ["APOD", "Mars Rover Photos", "Asteroids NeoWs", "EPIC", "Earth Imagery", "EONET"])
-
 
 # Alien animation in sidebar
 alien_animation = """
@@ -302,7 +307,8 @@ elif api_choice == "Mars Rover Photos":
     rover = "Curiosity"  # We're focusing only on Curiosity
 
     # Add information about the relationship between Sol and Earth date
-    st.info("Note: Sol 0 for Curiosity corresponds to August 6, 2012 (Earth date). Each Sol is approximately 24 hours and 39 minutes long.")
+    st.info(
+        "Note: Sol 0 for Curiosity corresponds to August 6, 2012 (Earth date). Each Sol is approximately 24 hours and 39 minutes long.")
 
     search_type = st.radio("Search by", ["Martian Sol", "Earth Date"])
 
@@ -425,8 +431,9 @@ elif api_choice == "Asteroids NeoWs":
             col1, col2 = st.columns([1, 2])
             with col1:
                 # Display a generic asteroid image
-                st.image("https://imgs.search.brave.com/R4nwYmQBrjXwn9eFINYFwNCPWMftnLb8_MdiDwH55GI/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJjYXZlLmNv/bS93cC9tS3FqVk82/LmpwZw",
-                         caption="Generic Asteroid Image (NASA)")
+                st.image(
+                    "https://imgs.search.brave.com/R4nwYmQBrjXwn9eFINYFwNCPWMftnLb8_MdiDwH55GI/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJjYXZlLmNv/bS93cC9tS3FqVk82/LmpwZw",
+                    caption="Generic Asteroid Image (NASA)")
             with col2:
                 st.json(asteroid_info)
 
