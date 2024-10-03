@@ -5,11 +5,11 @@ import pandas as pd
 import plotly.express as px
 import folium
 from PIL import Image
-from streamlit_folium import st_folium, folium_static
+from streamlit_folium import folium_static
 from datetime import datetime, timedelta, timezone
-from functions import (fetch_apod_data,display_folium_map, fetch_earth_imagery, fetch_eonet_events,
+from functions import (fetch_apod_data, display_folium_map, fetch_earth_imagery, fetch_eonet_events,
                        fetch_asteroid_data, fetch_earth_assets, fetch_and_display_photos, get_camera_options,
-                       fetch_epic_data, process_eonet_data, load_image_from_url)
+                       fetch_epic_data, process_eonet_data)
 
 # Set page config
 st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide", initial_sidebar_state="auto")
