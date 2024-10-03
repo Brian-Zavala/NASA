@@ -4,7 +4,6 @@ from PIL import Image
 import pandas as pd
 from datetime import datetime, timedelta
 from io import BytesIO
-
 from streamlit_folium import st_folium
 
 
@@ -169,7 +168,8 @@ def fetch_and_display_photos(api_key, rover, date_param, camera_param, page):
                 for i, photo in enumerate(photos):
                     with cols[i % 3]:
                         st.markdown('<div class="responsive-img-container">', unsafe_allow_html=True)
-                        st.image(photo["img_src"], caption=f"Photo {i + 1} - Camera: {photo['camera']['full_name']}", use_column_width=True)
+                        st.image(photo["img_src"], caption=f"Photo {i + 1} - Camera: {photo['camera']['full_name']}",
+                                 use_column_width=True)
                         st.markdown('</div>', unsafe_allow_html=True)
 
                 # Create a dataframe of all photos for download
@@ -215,6 +215,7 @@ def fetch_earth_assets(api_key, lat, lon, date):
 def load_image_from_url(url):
     response = requests.get(url)
     return Image.open(BytesIO(response.content))
+
 
 def display_folium_map(m, height):
     st_folium(m, width=None, height=height)

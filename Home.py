@@ -644,7 +644,7 @@ elif api_choice == "Earth Imagery":
 
         # Display the map with the image overlay
         st.subheader("Image Overlay on Map")
-        display_folium_map(m, width="100%", height=500)
+        display_folium_map(m, height=500)
 
 
 elif api_choice == "EONET":
