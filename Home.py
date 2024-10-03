@@ -395,6 +395,7 @@ elif api_choice == "Mars Rover Photos":
     # Fetch photos when any parameter changes
     fetch_and_display_photos(api_key, rover, date_param, camera_param, page)
 
+
 elif api_choice == "Asteroids NeoWs":
     st.header("Near Earth Objects")
 
