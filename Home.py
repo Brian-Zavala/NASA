@@ -14,23 +14,29 @@ from functions import (fetch_apod_data, fetch_earth_imagery, fetch_eonet_events,
 # Set page config
 st.set_page_config(page_title="NASA Data Explorer", page_icon="🚀", layout="wide", initial_sidebar_state="auto")
 
-
-# Custom CSS to position the logo
+# Add JavaScript to handle scrolling issues on iOS
 st.markdown("""
-    <style>
-    #logo-container {
-        position: fixed;
-        top: 15px;
-        left: 15px;  /* Adjust this value to position the logo correctly next to the sidebar arrow */
-        z-index: 999;
-    }
-    #logo-container img {
-        max-height: 50px;  /* Adjust the size of your logo as needed */
-        width: auto;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+    const preventScroll = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
 
+    const appElement = document.querySelector('.stApp');
+    if (appElement) {
+        appElement.addEventListener('touchmove', preventScroll, { passive: false });
+    }
+
+    const sidebarElement = document.querySelector('[data-testid="stSidebar"]');
+    if (sidebarElement) {
+        sidebarElement.addEventListener('touchmove', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
+    }
+});
+</script>
+""", unsafe_allow_html=True)
 
 # Custom CSS with space theme and glowing text
 st.markdown("""
@@ -40,6 +46,23 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
 /* Global Styles */
+/* Improve text visibility on iOS */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Improve text readability in sidebar */
+[data-testid="stSidebar"] > div:first-child {
+    background-color: rgba(255, 0, 0, 0.1);  /* More opaque background */
+}
+
+/* Ensure text has proper contrast */
+.title, .sidebar-title, .stButton > button, .stTextInput > div > div > input, .stSelectbox > div > div > select {
+    color: #e0e0ff !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);  /* Add text shadow for better readability */
+}
+
 body {
     background-color: #0c0c1d;
     color: #e0e0ff;
