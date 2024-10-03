@@ -31,18 +31,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# URL of your GIF
-gif_url = "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHdtOHFnYW01aTh0d2ljcXRhN244dHJqY3J3amwyZWowd2doNW1wcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/k7AEaKLU0maVvEpgPG/giphy.webp"
-
-# Load the GIF
-logo_gif = load_image_from_url(gif_url)
-
-# Display the logo
-st.markdown(f"""
-    <div id="logo-container">
-        <img src="{gif_url}" alt="Logo">
-    </div>
-    """, unsafe_allow_html=True)
 
 # Custom CSS with space theme and glowing text
 st.markdown("""
