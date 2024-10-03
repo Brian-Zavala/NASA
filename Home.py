@@ -210,7 +210,41 @@ body {
     opacity: 0;
 }
 
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
 
+/* Responsive container for images */
+.responsive-img-container {
+    width: 100%;
+    max-width: 800px;  /* Adjust this value as needed */
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* Ensure Plotly charts are responsive */
+.plotly-graph-div {
+    width: 100% !important;
+}
+
+/* Make Folium maps responsive */
+.folium-map {
+    width: 100% !important;
+    height: 0 !important;
+    padding-bottom: 75% !important;  /* Adjust this value for desired aspect ratio */
+    position: relative !important;
+}
+
+.folium-map iframe {
+    position: absolute !important;
+    width: 100% !important;
+    height: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+}
 /* Responsive Styles */
 @media (max-width: 767px) {
     .title {
