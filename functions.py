@@ -27,7 +27,7 @@ def fetch_apod_data(api_key, date=None, start_date=None, end_date=None, count=No
 
 
 @st.cache_data(ttl=3600)  # Cache for 1 hour
-def fetch_mars_rover_photos(api_key, rover, date_param, camera=None, page=1):
+def fetch_mars_rover_photos(api_key, rover, date_param, camera=None, page=0):
     url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/{rover}/photos"
     params = {
         "api_key": api_key,
