@@ -513,8 +513,15 @@ elif api_choice == "Earth Imagery":
         # Display the map with the image overlay
         st.subheader("Image Overlay on Map")
         st_folium(m, width=725, height=500)
+
 elif api_choice == "EONET":
     st.header("Earth Observatory Natural Event Tracker (EONET)")
+
+    # Initialize session state variables
+    if 'eonet_data' not in st.session_state:
+        st.session_state.eonet_data = None
+    if 'selected_asteroid' not in st.session_state:
+        st.session_state.selected_asteroid = None
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -524,11 +531,14 @@ elif api_choice == "EONET":
     with col3:
         status = st.selectbox("Event status", ["all", "open", "closed"])
 
-    if st.button("Fetch EONET Data"):
+    if st.button("Fetch EONET Data") or st.session_state.eonet_data is None:
         with st.spinner("Fetching EONET data..."):
             eonet_data = fetch_eonet_events(limit=limit, days=days, status=status)
+            st.session_state.eonet_data = eonet_data
 
-        if eonet_data and "events" in eonet_data:
+    if st.session_state.eonet_data:
+        eonet_data = st.session_state.eonet_data
+        if "events" in eonet_data:
             events_df = process_eonet_data(eonet_data)
 
             if not events_df.empty:
@@ -567,7 +577,7 @@ elif api_choice == "EONET":
                         popup=f"<b>{event['title']}</b><br>Date: {event['date']}<br><a href='{event['source']}' target='_blank'>More Info</a>",
                         tooltip=f"{event['category']}: {event['title']}"
                     ).add_to(m)
-                folium_static(m)
+                folium_static(m, width=700, height=500)
 
                 # Events table
                 st.subheader("Filtered Events")
@@ -581,6 +591,16 @@ elif api_choice == "EONET":
                     file_name="eonet_events_filtered.csv",
                     mime="text/csv",
                 )
+
+                # Explore Individual Events
+                st.subheader("Explore Individual Events")
+                event_options = filtered_df['title'].tolist()
+                selected_event = st.selectbox("Select an event", event_options, key="event_selectbox")
+
+                if selected_event:
+                    event_info = filtered_df[filtered_df['title'] == selected_event].iloc[0]
+                    st.json(event_info.to_dict())
+
             else:
                 st.warning("No events found for the specified criteria.")
         else:
