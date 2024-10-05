@@ -315,13 +315,6 @@ img {
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<style>
-    * {
-       overflow-anchor: none !important;
-       }
-</style>
-""", unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
